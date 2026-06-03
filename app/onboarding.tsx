@@ -124,7 +124,10 @@ export default function OnboardingScreen() {
       return (
         <FadeContent key={step.key}>
           <View style={styles.nameFormContainer}>
-            <Text style={styles.nameTitle}>What should we call you?</Text>
+            <Text style={styles.nameTitle}>
+              What should{' '}
+              <Text style={styles.nameTitleAccent}>we call you?</Text>
+            </Text>
             <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
             <TextInput
               style={styles.textInput}
@@ -300,6 +303,9 @@ const styles = StyleSheet.create({
     color: Tokens.colors.zinc[900],
     marginBottom: Tokens.spacing[2],
     textAlign: 'center',
+  },
+  nameTitleAccent: {
+    color: Tokens.colors.teal[500],
   },
   nameSubtitle: {
     fontSize: Tokens.typography.fontSize.lg,
