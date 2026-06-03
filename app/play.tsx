@@ -148,13 +148,12 @@ export default function PlayScreen() {
           horizontal
           style={styles.carousel}
           showsHorizontalScrollIndicator={false}
-          // Native, velocity-aware snapping: momentum is projected and resolved
-          // to the nearest card so a release never lands between two cards.
+          // Smooth snapping with momentum: the carousel decelerates smoothly
+          // to the nearest card boundary, then snaps with easing.
           snapToInterval={ITEM_SIZE}
           snapToAlignment="start"
-          disableIntervalMomentum
-          decelerationRate="fast"
-          // `bounces` gives the soft resistance felt at the first/last card edges.
+          decelerationRate={0.9}
+          // `bounces` gives soft resistance at first/last card edges.
           bounces
           scrollEventThrottle={16}
           onScroll={scrollHandler}
