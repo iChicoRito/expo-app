@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: Tokens.colors.teal[500],
-    borderRadius: Tokens.layout.borderRadius['3xl'],
+    borderRadius: Tokens.layout.borderRadius['2xl'],
     paddingVertical: Tokens.spacing[4],
     alignItems: 'center',
     width: '100%',
