@@ -10,13 +10,16 @@ import { useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
-  FlatList,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DeckCard, type DeckData } from "@/components/deck-card";
@@ -28,6 +31,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.72;
 const CARD_HEIGHT = CARD_WIDTH * 1.4;
 const CARD_GAP = 16;
+const ITEM_SIZE = CARD_WIDTH + CARD_GAP;
 const SIDE_PAD = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 
 const DECKS: DeckData[] = [
@@ -80,10 +84,18 @@ export default function PlayScreen() {
   const displayName = name?.trim() || "Friend";
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleScroll = useCallback(
+  // Live scroll offset, shared with each card so its scale/opacity/shadow can be
+  // interpolated on the UI thread for jank-free, finger-tracking motion.
+  const scrollX = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollX.value = event.contentOffset.x;
+  });
+
+  // The active index is a discrete value (drives the Play button), so it only
+  // needs to update once momentum settles on a snapped card.
+  const handleMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const x = e.nativeEvent.contentOffset.x;
-      const idx = Math.round(x / (CARD_WIDTH + CARD_GAP));
+      const idx = Math.round(e.nativeEvent.contentOffset.x / ITEM_SIZE);
       setActiveIndex(Math.max(0, Math.min(idx, DECKS.length - 1)));
     },
     [],
@@ -124,24 +136,35 @@ export default function PlayScreen() {
 
       {/* ── Carousel ── */}
       <View style={styles.carouselWrapper}>
-        <FlatList
+        <Animated.FlatList
           data={DECKS}
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          snapToInterval={CARD_WIDTH + CARD_GAP}
+          // Native, velocity-aware snapping: momentum is projected and resolved
+          // to the nearest card so a release never lands between two cards.
+          snapToInterval={ITEM_SIZE}
+          snapToAlignment="start"
+          disableIntervalMomentum
           decelerationRate="fast"
+          // `bounces` gives the soft resistance felt at the first/last card edges.
+          bounces
+          scrollEventThrottle={16}
+          onScroll={scrollHandler}
+          onMomentumScrollEnd={handleMomentumEnd}
           contentContainerStyle={[
             styles.carouselContent,
             { paddingHorizontal: SIDE_PAD },
           ]}
           ItemSeparatorComponent={() => <View style={{ width: CARD_GAP }} />}
-          onMomentumScrollEnd={handleScroll}
           renderItem={({ item, index }) => (
             <DeckCard
               deck={item}
               width={CARD_WIDTH}
               height={CARD_HEIGHT}
+              index={index}
+              itemSize={ITEM_SIZE}
+              scrollX={scrollX}
               isActive={index === activeIndex}
             />
           )}

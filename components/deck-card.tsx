@@ -1,5 +1,11 @@
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  type SharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 import { Tokens } from "@/constants/tokens";
 
@@ -15,53 +21,122 @@ type Props = {
   deck: DeckData;
   width: number;
   height: number;
+  /** Index of this card in the carousel. */
+  index: number;
+  /** Distance (in px) between the centers of two adjacent cards (card width + gap). */
+  itemSize: number;
+  /** Live horizontal scroll offset, driven on the UI thread. */
+  scrollX: SharedValue<number>;
+  /** Whether this card is the resolved active (centered) card — drives the Play button. */
   isActive: boolean;
 };
 
-export function DeckCard({ deck, width, height, isActive }: Props) {
+export function DeckCard({
+  deck,
+  width,
+  height,
+  index,
+  itemSize,
+  scrollX,
+  isActive,
+}: Props) {
   const upperHeight = height * 0.55;
   const lowerHeight = height * 0.45;
 
+  // The card is centered when scrollX === index * itemSize. We interpolate every
+  // visual property against the same input range so scale, opacity and shadow
+  // all share one continuous, finger-tracking ease.
+  const inputRange = [
+    (index - 1) * itemSize,
+    index * itemSize,
+    (index + 1) * itemSize,
+  ];
+
+  const animatedWrapperStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.86, 1, 0.86],
+      Extrapolation.CLAMP,
+    );
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.45, 1, 0.45],
+      Extrapolation.CLAMP,
+    );
+    const shadowOpacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0, 0.28, 0],
+      Extrapolation.CLAMP,
+    );
+    const elevation = interpolate(
+      scrollX.value,
+      inputRange,
+      [0, 12, 0],
+      Extrapolation.CLAMP,
+    );
+    return {
+      transform: [{ scale }],
+      opacity,
+      shadowOpacity,
+      elevation,
+    };
+  });
+
   return (
-    <View
-      style={[styles.card, { width, height, backgroundColor: deck.bgColor }]}
+    <Animated.View
+      style={[styles.wrapper, { width, height }, animatedWrapperStyle]}
     >
-      {/* Upper section — title + count badge */}
-      <View style={[styles.upper, { height: upperHeight }]}>
-        <Text style={styles.title}>{deck.title}</Text>
-        <View style={styles.badge}>
-          <Text style={[styles.badgeText, { color: deck.bgColor }]}>
-            x16 cards
-          </Text>
-        </View>
-      </View>
-
-      {/* Lower section — icon circle + optional Play button */}
-      <View
-        style={[
-          styles.lower,
-          { height: lowerHeight, backgroundColor: deck.bgLight },
-        ]}
-      >
-        <View style={[styles.iconCircle, { borderColor: deck.bgColor }]}>
-          <HugeiconsIcon icon={deck.icon} size={24} color={deck.bgColor} />
+      <View style={[styles.card, { backgroundColor: deck.bgColor }]}>
+        {/* Upper section — title + count badge */}
+        <View style={[styles.upper, { height: upperHeight }]}>
+          <Text style={styles.title}>{deck.title}</Text>
+          <View style={styles.badge}>
+            <Text style={[styles.badgeText, { color: deck.bgColor }]}>
+              x16 cards
+            </Text>
+          </View>
         </View>
 
-        {isActive && (
-          <TouchableOpacity
-            style={[styles.playButton, { backgroundColor: deck.bgColor }]}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.playText}>Play</Text>
-          </TouchableOpacity>
-        )}
+        {/* Lower section — icon circle + optional Play button */}
+        <View
+          style={[
+            styles.lower,
+            { height: lowerHeight, backgroundColor: deck.bgLight },
+          ]}
+        >
+          <View style={[styles.iconCircle, { borderColor: deck.bgColor }]}>
+            <HugeiconsIcon icon={deck.icon} size={24} color={deck.bgColor} />
+          </View>
+
+          {isActive && (
+            <TouchableOpacity
+              style={[styles.playButton, { backgroundColor: deck.bgColor }]}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.playText}>Play</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Outer wrapper carries scale + animated shadow. Kept free of `overflow:hidden`
+  // so the shadow is not clipped; the inner card clips its own rounded sections.
+  wrapper: {
+    borderRadius: 24,
+    backgroundColor: Tokens.colors.white,
+    shadowColor: Tokens.colors.black,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 16,
+  },
   card: {
+    flex: 1,
     borderRadius: 24,
     overflow: "hidden",
   },
