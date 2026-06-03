@@ -6,7 +6,9 @@ import Animated, {
   type SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import Svg, { Path } from "react-native-svg";
 
+import { DiamondGrid } from "@/components/diamond-grid";
 import { Tokens } from "@/constants/tokens";
 
 export type DeckData = {
@@ -31,6 +33,18 @@ type Props = {
   isActive: boolean;
 };
 
+/** Blend a #rrggbb color toward black (amt<0) or white (amt>0) by |amt| (0..1). */
+function mix(hex: string, amt: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const target = amt < 0 ? 0 : 255;
+  const p = Math.abs(amt);
+  const ch = (c: number) => Math.round((target - c) * p) + c;
+  return `rgb(${ch(r)}, ${ch(g)}, ${ch(b)})`;
+}
+
 export function DeckCard({
   deck,
   width,
@@ -40,12 +54,15 @@ export function DeckCard({
   scrollX,
   isActive,
 }: Props) {
-  const upperHeight = height * 0.55;
-  const lowerHeight = height * 0.45;
+  const darkBand = mix(deck.bgColor, -0.12);
+  const waveLine = mix(deck.bgColor, 0.18);
+  const waveHeight = height * 0.42;
+  const dip = height * 0.05;
+  const wavePath = `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`;
+  const waveLinePath = `M0 0 Q${width / 2} ${dip} ${width} 0`;
 
-  // The card is centered when scrollX === index * itemSize. We interpolate every
-  // visual property against the same input range so scale, opacity and shadow
-  // all share one continuous, finger-tracking ease.
+  // The card is centered when scrollX === index * itemSize. We interpolate scale
+  // and opacity against the same input range so both share one continuous ease.
   const inputRange = [
     (index - 1) * itemSize,
     index * itemSize,
@@ -65,10 +82,7 @@ export function DeckCard({
       [0.45, 1, 0.45],
       Extrapolation.CLAMP,
     );
-    return {
-      transform: [{ scale }],
-      opacity,
-    };
+    return { transform: [{ scale }], opacity };
   });
 
   return (
@@ -76,33 +90,39 @@ export function DeckCard({
       style={[styles.wrapper, { width, height }, animatedWrapperStyle]}
     >
       <View style={[styles.card, { backgroundColor: deck.bgColor }]}>
-        {/* Upper section — title + count badge */}
-        <View style={[styles.upper, { height: upperHeight }]}>
-          <Text style={styles.title}>{deck.title}</Text>
-          <View style={styles.badge}>
-            <Text style={[styles.badgeText, { color: deck.bgColor }]}>
-              x16 cards
-            </Text>
-          </View>
-        </View>
+        {/* Diamond-grid texture */}
+        <DiamondGrid width={width} height={height} />
 
-        {/* Lower section — icon circle + optional Play button */}
-        <View
-          style={[
-            styles.lower,
-            { height: lowerHeight, backgroundColor: deck.bgLight },
-          ]}
+        {/* Curved darker band near the bottom */}
+        <Svg
+          width={width}
+          height={waveHeight}
+          style={styles.wave}
+          pointerEvents="none"
         >
-          <View style={[styles.iconCircle, { borderColor: deck.bgColor }]}>
-            <HugeiconsIcon icon={deck.icon} size={24} color={deck.bgColor} />
+          <Path d={wavePath} fill={darkBand} />
+          <Path
+            d={waveLinePath}
+            stroke={waveLine}
+            strokeWidth={3}
+            fill="none"
+          />
+        </Svg>
+
+        {/* Content */}
+        <View style={styles.content}>
+          <View style={styles.topRow}>
+            <Text style={styles.title}>{deck.title.split(" ").join("\n")}</Text>
+            <View style={styles.iconBadge}>
+              <HugeiconsIcon icon={deck.icon} size={20} color={deck.bgColor} />
+            </View>
           </View>
 
           {isActive && (
-            <TouchableOpacity
-              style={[styles.playButton, { backgroundColor: deck.bgColor }]}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.playText}>Play</Text>
+            <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
+              <Text style={[styles.playText, { color: deck.bgColor }]}>
+                Play
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -112,65 +132,56 @@ export function DeckCard({
 }
 
 const styles = StyleSheet.create({
-  // Outer wrapper carries the scale animation; the inner card clips its own
-  // rounded sections via overflow:hidden.
+  // Outer wrapper carries the scale animation; the inner card clips its texture,
+  // wave and rounded corners via overflow:hidden.
   wrapper: {
-    borderRadius: 24,
+    borderRadius: 28,
   },
   card: {
     flex: 1,
-    borderRadius: 24,
+    borderRadius: 28,
     overflow: "hidden",
   },
-  upper: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: Tokens.spacing[5],
-    paddingTop: Tokens.spacing[6],
-    gap: Tokens.spacing[3],
+  wave: {
+    position: "absolute",
+    left: 0,
+    bottom: 0,
+  },
+  content: {
+    flex: 1,
+    padding: Tokens.spacing[5],
+    justifyContent: "space-between",
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
   title: {
+    flexShrink: 1,
     fontSize: Tokens.typography.fontSize["4xl"],
+    lineHeight: Tokens.typography.lineHeight[6],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
-    textAlign: "center",
   },
-  badge: {
+  iconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Tokens.colors.white,
-    borderRadius: Tokens.layout.borderRadius.full,
-    paddingVertical: Tokens.spacing[1],
-    paddingHorizontal: Tokens.spacing[4],
-  },
-  badgeText: {
-    fontSize: Tokens.typography.fontSize.sm,
-    fontWeight: Tokens.typography.fontWeight.semibold,
-  },
-  lower: {
-    alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: Tokens.spacing[5],
-    paddingHorizontal: Tokens.spacing[5],
-    gap: Tokens.spacing[4],
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Tokens.colors.white,
-    borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -28, // straddle the boundary between the two sections
+    marginLeft: Tokens.spacing[2],
   },
   playButton: {
     width: "100%",
-    paddingVertical: Tokens.spacing[3],
-    borderRadius: Tokens.layout.borderRadius.xl,
+    backgroundColor: Tokens.colors.white,
+    paddingVertical: Tokens.spacing[4],
+    borderRadius: Tokens.layout.borderRadius["2xl"],
     alignItems: "center",
   },
   playText: {
-    color: Tokens.colors.white,
-    fontSize: Tokens.typography.fontSize.base,
+    fontSize: Tokens.typography.fontSize.lg,
     fontWeight: Tokens.typography.fontWeight.semibold,
   },
 });
