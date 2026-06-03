@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
   carousel: {
     height: CAROUSEL_HEIGHT,
     flexGrow: 0,
+    paddingTop: Tokens.spacing[8],
     paddingBottom: Tokens.spacing[8],
   },
   carouselContent: {
