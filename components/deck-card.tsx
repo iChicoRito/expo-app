@@ -56,7 +56,7 @@ export function DeckCard({
     const scale = interpolate(
       scrollX.value,
       inputRange,
-      [0.86, 1, 0.86],
+      [0.8, 1.1, 0.8],
       Extrapolation.CLAMP,
     );
     const opacity = interpolate(
