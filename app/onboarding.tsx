@@ -334,19 +334,17 @@ const styles = StyleSheet.create({
   // ── Name content ──
   nameFormWrapper: {
     width: "100%",
-    alignItems: "center",
   },
   nameFormContainer: {
     width: "100%",
     paddingHorizontal: Tokens.spacing[8],
-    alignItems: "center",
   },
   nameTitle: {
     fontSize: Tokens.typography.fontSize["4xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
     marginBottom: Tokens.spacing[2],
-    textAlign: "center",
+    textAlign: "left",
   },
   nameTitleAccent: {
     color: Tokens.colors.teal[500],
@@ -356,7 +354,7 @@ const styles = StyleSheet.create({
     fontWeight: Tokens.typography.fontWeight.normal,
     color: Tokens.colors.neutral[400],
     marginBottom: Tokens.spacing[6],
-    textAlign: "center",
+    textAlign: "left",
   },
   textInput: {
     fontSize: Tokens.typography.fontSize.base,
