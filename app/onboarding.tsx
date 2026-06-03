@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     paddingVertical: Tokens.spacing[4],
     paddingHorizontal: Tokens.spacing[8],
     marginBottom: Tokens.spacing[8],
-    width: '100%',
+    width: '85%',
   },
 
   // ── Welcome content ──
