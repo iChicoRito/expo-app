@@ -281,7 +281,7 @@ export default function GameScreen() {
               style={[styles.cardFace, styles.cardBack, backStyle]}
             >
               <Text style={styles.questionText}>
-                “{questions[currentIndex]}”
+                {questions[currentIndex]}
               </Text>
             </Animated.View>
           </View>
