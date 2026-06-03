@@ -1,16 +1,11 @@
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-  Easing,
   Extrapolation,
   interpolate,
   type SharedValue,
   useAnimatedStyle,
-  useAnimatedReaction,
-  useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
-import { useEffect } from "react";
 import Svg, { Path } from "react-native-svg";
 
 import { DiamondGrid } from "@/components/diamond-grid";
@@ -64,49 +59,26 @@ export function DeckCard({
   const wavePath = `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`;
   const waveLinePath = `M0 0 Q${width / 2} ${dip} ${width} 0`;
 
-  // Calculate if this card is active (closest to center) based on scroll position
-  const isActiveProgress = useSharedValue(0);
-
-  // Button slide-up + fade animation: starts 60px below with 0 opacity, animates to 0 translateY and 1 opacity when active
-  const buttonTranslateY = useSharedValue(60);
-  const buttonOpacity = useSharedValue(0);
-
-  useAnimatedReaction(
-    () => scrollX.value,
-    (scrollValue) => {
-      const activePosition = scrollValue / itemSize;
-      const distance = Math.abs(activePosition - index);
-      const shouldBeActive = distance < 0.5 ? 1 : 0;
-
-      isActiveProgress.value = withTiming(shouldBeActive, {
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
-      });
-    },
-    []
-  );
-
-  useAnimatedReaction(
-    () => isActiveProgress.value,
-    (isActive) => {
-      buttonTranslateY.value = isActive ? 0 : 60;
-      buttonOpacity.value = isActive ? 1 : 0;
-    },
-    []
-  );
-
-  const buttonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: buttonTranslateY.value }],
-    opacity: buttonOpacity.value,
-  }));
-
-  // The card is centered when scrollX === index * itemSize. We interpolate scale
-  // and opacity against the same input range so both share one continuous ease.
+  // The card is centered when scrollX === index * itemSize. We interpolate scale,
+  // opacity, and button animations against the same input range for perfect sync.
   const inputRange = [
     (index - 1) * itemSize,
     index * itemSize,
     (index + 1) * itemSize,
   ];
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => {
+    const progress = interpolate(
+      scrollX.value,
+      inputRange,
+      [1, 0, 1],
+      Extrapolation.CLAMP,
+    );
+    return {
+      transform: [{ translateY: interpolate(progress, [0, 1], [0, 60]) }],
+      opacity: interpolate(progress, [0, 1], [1, 0]),
+    };
+  });
 
   const animatedWrapperStyle = useAnimatedStyle(() => {
     const scale = interpolate(
