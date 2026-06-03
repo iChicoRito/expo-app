@@ -58,6 +58,7 @@ export function DeckCard({
   scrollX,
   isActive,
 }: Props) {
+  const borderColor = mix(deck.bgColor, -0.3);
   const darkBand = mix(deck.bgColor, -0.12);
   const waveLine = mix(deck.bgColor, 0.18);
   const waveHeight = height * 0.42;
@@ -121,7 +122,12 @@ export function DeckCard({
     <Animated.View
       style={[styles.wrapper, { width, height }, animatedWrapperStyle]}
     >
-      <View style={[styles.card, { backgroundColor: deck.bgColor }]}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: deck.bgColor, borderColor },
+        ]}
+      >
         {/* Diamond-grid texture */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <DiamondGrid width={width} height={height} />
@@ -179,7 +185,6 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     overflow: "hidden",
     borderWidth: 6,
-    borderColor: Tokens.colors.white,
   },
   wave: {
     position: "absolute",
