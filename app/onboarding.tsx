@@ -92,7 +92,7 @@ function NameCard({ name, onNameChange, onSubmit }: { name: string; onNameChange
     <KeyboardAvoidingView style={styles.step} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.nameContent}>
         <Text style={styles.nameTitle}>What should we call you?</Text>
-        <Text style={styles.nameSubtitle}>Your name personalizes your experience</Text>
+        <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
         <TextInput
           style={styles.textInput}
           placeholder="Enter your name"
@@ -200,6 +200,7 @@ const styles = StyleSheet.create({
     borderRadius: Tokens.layout.borderRadius['3xl'],
     paddingVertical: Tokens.spacing[4],
     alignItems: 'center',
+    width: '100%',
   },
   buttonDisabled: {
     opacity: Tokens.effects.opacity[40],
@@ -315,6 +316,5 @@ const styles = StyleSheet.create({
   },
   welcomeButton: {
     marginTop: Tokens.spacing[10],
-    width: '100%',
   },
 });
