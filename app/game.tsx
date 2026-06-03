@@ -118,14 +118,39 @@ export default function GameScreen() {
         goToResults(answered, passed);
         return;
       }
-      setAnsweredCount(answered);
-      setPassedCount(passed);
-      setCurrentIndex(currentIndex + 1);
-      setFlipped(false);
-      setSecondsLeft(TIMER_SECONDS);
-      flip.value = 0;
+
+      setIsTransitioning(true);
+
+      // Exit: slide current card upward off-screen (ease-in = starts slow, accelerates).
+      cardTranslateY.value = withTiming(
+        -SCREEN_HEIGHT,
+        { duration: 220, easing: Easing.in(Easing.cubic) },
+        (finished) => {
+          if (!finished) return;
+
+          // Card is off-screen — reset flip and reposition below screen instantly.
+          flip.value = 0;
+          cardTranslateY.value = SCREEN_HEIGHT;
+
+          // Advance state on JS thread.
+          runOnJS(setAnsweredCount)(answered);
+          runOnJS(setPassedCount)(passed);
+          runOnJS(setCurrentIndex)(currentIndex + 1);
+          runOnJS(setFlipped)(false);
+          runOnJS(setSecondsLeft)(TIMER_SECONDS);
+
+          // Entrance: slide next card up from below into center (ease-out = decelerates to stop).
+          cardTranslateY.value = withTiming(
+            0,
+            { duration: 280, easing: Easing.out(Easing.cubic) },
+            (entranceFinished) => {
+              if (entranceFinished) runOnJS(setIsTransitioning)(false);
+            },
+          );
+        },
+      );
     },
-    [currentIndex, total, goToResults, flip],
+    [currentIndex, total, goToResults, flip, cardTranslateY],
   );
 
   const handleFlip = () => {
