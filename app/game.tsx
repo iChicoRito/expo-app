@@ -18,7 +18,9 @@ import {
   View,
 } from "react-native";
 import Animated, {
+  Easing,
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
