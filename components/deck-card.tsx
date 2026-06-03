@@ -169,15 +169,10 @@ export function DeckCard({
 }
 
 const styles = StyleSheet.create({
-  // Outer wrapper carries the scale animation and shadow; the inner card clips
-  // its texture, wave and rounded corners via overflow:hidden.
+  // Outer wrapper carries the scale animation; the inner card clips its texture,
+  // wave and rounded corners via overflow:hidden.
   wrapper: {
     borderRadius: 28,
-    shadowColor: Tokens.colors.black,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
   },
   card: {
     flex: 1,
