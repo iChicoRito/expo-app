@@ -35,6 +35,8 @@ type Props = {
   scrollX: SharedValue<number>;
   /** Whether this card is the resolved active (centered) card — drives the Play button. */
   isActive: boolean;
+  /** Called when the (active) card's Play button is pressed. */
+  onPlay?: () => void;
 };
 
 /** Blend a #rrggbb color toward black (amt<0) or white (amt>0) by |amt| (0..1). */
@@ -57,6 +59,7 @@ export function DeckCard({
   itemSize,
   scrollX,
   isActive,
+  onPlay,
 }: Props) {
   const borderColor = mix(deck.bgColor, 0.3);
   const darkBand = mix(deck.bgColor, -0.12);
@@ -162,7 +165,11 @@ export function DeckCard({
             style={buttonAnimatedStyle}
             pointerEvents={isActive ? "auto" : "none"}
           >
-            <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
+            <TouchableOpacity
+              style={styles.playButton}
+              activeOpacity={0.85}
+              onPress={onPlay}
+            >
               <Text style={[styles.playText, { color: deck.bgColor }]}>
                 Play
               </Text>

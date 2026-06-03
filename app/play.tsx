@@ -1,12 +1,4 @@
-import {
-  BookOpen01Icon,
-  DropletIcon,
-  FavouriteIcon,
-  FireIcon,
-  Mic01Icon,
-  WinkIcon,
-} from "@hugeicons/core-free-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
@@ -23,10 +15,11 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BottomNav } from "@/components/bottom-nav";
-import { DeckCard, type DeckData } from "@/components/deck-card";
+import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
+import { DECKS } from "@/constants/decks";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -40,52 +33,8 @@ const SIDE_PAD = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 // push the dots down against the bottom nav).
 const CAROUSEL_HEIGHT = CARD_HEIGHT * 1.14;
 
-const DECKS: DeckData[] = [
-  {
-    id: "deep-spill",
-    title: "Deep Spill",
-    bgColor: "#3B82F6",
-    bgLight: "#EFF6FF",
-    icon: DropletIcon,
-  },
-  {
-    id: "no-dead-air",
-    title: "No Dead Air",
-    bgColor: "#A855F7",
-    bgLight: "#FAF5FF",
-    icon: Mic01Icon,
-  },
-  {
-    id: "drop-lore",
-    title: "Drop Lore",
-    bgColor: "#F97316",
-    bgLight: "#FFF7ED",
-    icon: BookOpen01Icon,
-  },
-  {
-    id: "chaos-mode",
-    title: "Chaos Mode",
-    bgColor: "#14B8A6",
-    bgLight: "#F0FDFA",
-    icon: WinkIcon,
-  },
-  {
-    id: "hot-seat",
-    title: "Hot Seat",
-    bgColor: "#EF4444",
-    bgLight: "#FEF2F2",
-    icon: FireIcon,
-  },
-  {
-    id: "date-mode",
-    title: "Date Mode",
-    bgColor: "#EC4899",
-    bgLight: "#FDF2F8",
-    icon: FavouriteIcon,
-  },
-];
-
 export default function PlayScreen() {
+  const router = useRouter();
   const { name } = useLocalSearchParams<{ name?: string }>();
   const displayName = name?.trim() || "Friend";
   const [activeIndex, setActiveIndex] = useState(0);
@@ -172,6 +121,12 @@ export default function PlayScreen() {
               itemSize={ITEM_SIZE}
               scrollX={scrollX}
               isActive={index === activeIndex}
+              onPlay={() =>
+                router.push({
+                  pathname: "/preparation",
+                  params: { deckId: item.id, name: displayName },
+                })
+              }
             />
           )}
         />
