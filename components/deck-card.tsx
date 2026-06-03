@@ -108,7 +108,7 @@ export function DeckCard({
     const rotate = interpolate(
       scrollX.value,
       inputRange,
-      [-8, 0, 8],
+      [8, 0, -8],
       Extrapolation.CLAMP,
     );
     return {
