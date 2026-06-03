@@ -17,9 +17,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import * as SecureStore from "expo-secure-store";
+
 import { DotIndicator } from "@/components/dot-indicator";
-import { Snackbar } from "@/components/snackbar";
 import { Tokens } from "@/constants/tokens";
+import { USER_NAME_KEY } from "@/constants/storage";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.52;
@@ -89,7 +91,6 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [name, setName] = useState("");
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const step = STEPS[currentStep];
 
@@ -108,10 +109,12 @@ export default function OnboardingScreen() {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      setSnackbarVisible(true);
-      setTimeout(() => {
-        router.replace({ pathname: "/play", params: { name: name.trim() } });
-      }, 1200);
+      const trimmedName = name.trim();
+      SecureStore.setItemAsync(USER_NAME_KEY, trimmedName)
+        .catch(() => {})
+        .finally(() => {
+          router.replace({ pathname: "/play", params: { name: trimmedName } });
+        });
     }
   }, [currentStep, step, name, router]);
 
@@ -219,7 +222,6 @@ export default function OnboardingScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-      <Snackbar visible={snackbarVisible} message="You're on the last page" />
     </SafeAreaView>
   );
 }
