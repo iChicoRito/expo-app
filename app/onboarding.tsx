@@ -333,11 +333,12 @@ const styles = StyleSheet.create({
 
   // ── Name content ──
   nameFormWrapper: {
-    width: "100%",
+    flex: 1,
+    paddingHorizontal: Tokens.spacing[8],
+    justifyContent: "center",
   },
   nameFormContainer: {
     width: "100%",
-    paddingHorizontal: Tokens.spacing[8],
   },
   nameTitle: {
     fontSize: Tokens.typography.fontSize["4xl"],
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
     borderColor: Tokens.colors.zinc[300],
     borderRadius: Tokens.layout.borderRadius.xl,
     paddingVertical: Tokens.spacing[4],
-    paddingHorizontal: Tokens.spacing[8],
+    paddingHorizontal: Tokens.spacing[4],
     marginBottom: Tokens.spacing[8],
     width: "100%",
     textAlign: "left",
