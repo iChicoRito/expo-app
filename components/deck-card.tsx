@@ -5,7 +5,10 @@ import Animated, {
   interpolate,
   type SharedValue,
   useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
+import { useEffect } from "react";
 import Svg, { Path } from "react-native-svg";
 
 import { DiamondGrid } from "@/components/diamond-grid";
@@ -60,6 +63,22 @@ export function DeckCard({
   const dip = height * 0.05;
   const wavePath = `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`;
   const waveLinePath = `M0 0 Q${width / 2} ${dip} ${width} 0`;
+
+  // Button slide-up animation: starts 60px below, animates to 0 when active
+  const buttonTranslateY = useSharedValue(60);
+  useEffect(() => {
+    buttonTranslateY.value = withTiming(isActive ? 0 : 60, {
+      duration: 400,
+      easing: (progress) => {
+        // ease-in: smooth slow start, faster end
+        return progress * progress;
+      },
+    });
+  }, [isActive, buttonTranslateY]);
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: buttonTranslateY.value }],
+  }));
 
   // The card is centered when scrollX === index * itemSize. We interpolate scale
   // and opacity against the same input range so both share one continuous ease.
@@ -120,13 +139,15 @@ export function DeckCard({
             </View>
           </View>
 
-          {isActive && (
-            <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
-              <Text style={[styles.playText, { color: deck.bgColor }]}>
-                Play
-              </Text>
-            </TouchableOpacity>
-          )}
+          <Animated.View style={buttonAnimatedStyle}>
+            {isActive && (
+              <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
+                <Text style={[styles.playText, { color: deck.bgColor }]}>
+                  Play
+                </Text>
+              </TouchableOpacity>
+            )}
+          </Animated.View>
         </View>
       </View>
     </Animated.View>
@@ -162,7 +183,6 @@ const styles = StyleSheet.create({
   title: {
     flexShrink: 1,
     fontSize: Tokens.typography.fontSize["6xl"],
-    lineHeight: 24,
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
   },
