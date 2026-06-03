@@ -244,7 +244,8 @@ export default function GameScreen() {
         </View>
 
         {/* Flip card */}
-        <Pressable onPress={handleFlip} disabled={flipped}>
+        <Animated.View style={cardSlideStyle}>
+        <Pressable onPress={handleFlip} disabled={flipped || isTransitioning}>
           <View style={styles.cardSizer}>
             {/* Front — unflipped */}
             <Animated.View style={[styles.cardFace, frontStyle]}>
@@ -284,6 +285,7 @@ export default function GameScreen() {
             </Animated.View>
           </View>
         </Pressable>
+        </Animated.View>
 
         {/* Progress bar */}
         <View style={styles.progressWrapper}>
@@ -299,7 +301,7 @@ export default function GameScreen() {
       {/* ── Actions (visible once flipped) ── */}
       <View style={styles.actionsSlot}>
         {flipped && (
-          <View style={styles.actionsRow}>
+          <View style={styles.actionsRow} pointerEvents={isTransitioning ? "none" : "auto"}>
             <ActionButton
               icon={Cancel01Icon}
               label="End Round"
