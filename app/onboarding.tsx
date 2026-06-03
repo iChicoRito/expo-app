@@ -254,19 +254,20 @@ const styles = StyleSheet.create({
 
   // ── Intro content ──
   titleLine1: {
-    fontSize: Tokens.typography.fontSize['4xl'],
+    fontSize: Tokens.typography.fontSize['5xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
     textAlign: 'center',
   },
   titleLine2: {
-    fontSize: Tokens.typography.fontSize['4xl'],
+    fontSize: Tokens.typography.fontSize['5xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.teal[500],
     textAlign: 'center',
   },
   introSubtitle: {
-    fontSize: Tokens.typography.fontSize.sm,
+    fontSize: Tokens.typography.fontSize.lg,
+    fontWeight: Tokens.typography.fontWeight.normal,
     color: Tokens.colors.zinc[500],
     textAlign: 'center',
     marginTop: Tokens.spacing[3],
