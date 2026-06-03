@@ -65,23 +65,9 @@ export function DeckCard({
       [0.45, 1, 0.45],
       Extrapolation.CLAMP,
     );
-    const shadowOpacity = interpolate(
-      scrollX.value,
-      inputRange,
-      [0, 0.28, 0],
-      Extrapolation.CLAMP,
-    );
-    const elevation = interpolate(
-      scrollX.value,
-      inputRange,
-      [0, 12, 0],
-      Extrapolation.CLAMP,
-    );
     return {
       transform: [{ scale }],
       opacity,
-      shadowOpacity,
-      elevation,
     };
   });
 
@@ -126,14 +112,10 @@ export function DeckCard({
 }
 
 const styles = StyleSheet.create({
-  // Outer wrapper carries scale + animated shadow. Kept free of `overflow:hidden`
-  // so the shadow is not clipped; the inner card clips its own rounded sections.
+  // Outer wrapper carries the scale animation; the inner card clips its own
+  // rounded sections via overflow:hidden.
   wrapper: {
     borderRadius: 24,
-    backgroundColor: Tokens.colors.white,
-    shadowColor: Tokens.colors.black,
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 16,
   },
   card: {
     flex: 1,
