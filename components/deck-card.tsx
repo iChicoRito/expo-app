@@ -180,6 +180,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 2,
     borderColor: Tokens.colors.white,
+    shadowColor: Tokens.colors.black,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   wave: {
     position: "absolute",
