@@ -35,6 +35,10 @@ const CARD_HEIGHT = CARD_WIDTH * 1.4;
 const CARD_GAP = 16;
 const ITEM_SIZE = CARD_WIDTH + CARD_GAP;
 const SIDE_PAD = (SCREEN_WIDTH - CARD_WIDTH) / 2;
+// Fixed track height with headroom so the scaled-up (1.1x) active card is not
+// clipped, and so the list does not stretch to fill the column (which would
+// push the dots down against the bottom nav).
+const CAROUSEL_HEIGHT = CARD_HEIGHT * 1.14;
 
 const DECKS: DeckData[] = [
   {
@@ -142,6 +146,7 @@ export default function PlayScreen() {
           data={DECKS}
           keyExtractor={(item) => item.id}
           horizontal
+          style={styles.carousel}
           showsHorizontalScrollIndicator={false}
           // Native, velocity-aware snapping: momentum is projected and resolved
           // to the nearest card so a release never lands between two cards.
@@ -271,8 +276,11 @@ const styles = StyleSheet.create({
   carouselWrapper: {
     flex: 1,
     justifyContent: "flex-start",
-    // Small headroom so the scaled-up (1.1x) active card doesn't clip at the top.
     paddingTop: Tokens.spacing[2],
+  },
+  carousel: {
+    height: CAROUSEL_HEIGHT,
+    flexGrow: 0,
   },
   carouselContent: {
     alignItems: "center",
@@ -282,5 +290,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: Tokens.spacing[2],
     marginTop: Tokens.spacing[6],
+    marginBottom: Tokens.spacing[8],
   },
 });
