@@ -162,18 +162,18 @@ export default function OnboardingScreen() {
               <Text style={styles.nameSubtitle}>
                 Your name personalizes your Spillr
               </Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter your name"
+                placeholderTextColor={Tokens.colors.zinc[400]}
+                value={name}
+                onChangeText={setName}
+                returnKeyType="done"
+                autoCorrect={false}
+                autoCapitalize="words"
+                textAlign="left"
+              />
             </View>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your name"
-              placeholderTextColor={Tokens.colors.zinc[400]}
-              value={name}
-              onChangeText={setName}
-              returnKeyType="done"
-              autoCorrect={false}
-              autoCapitalize="words"
-              textAlign="left"
-            />
           </View>
         </FadeContent>
       );
@@ -336,9 +336,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Tokens.spacing[6],
     justifyContent: "center",
+    alignItems: "center",
   },
   nameFormContainer: {
     width: "100%",
+    justifyContent: "center",
   },
   nameTitle: {
     fontSize: Tokens.typography.fontSize["4xl"],
