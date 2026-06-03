@@ -64,7 +64,7 @@ function DotIndicator({ active }: { active: boolean }) {
 
 // ─── Step cards ──────────────────────────────────────────────────────────────
 
-function IntroCard({ item, currentStep, onNext }: { item: IntroStep; currentStep: number; onNext: () => void }) {
+function IntroCard({ item, currentStep }: { item: IntroStep; currentStep: number }) {
   return (
     <View style={styles.step}>
       <View style={styles.mascotArea} />
@@ -77,15 +77,12 @@ function IntroCard({ item, currentStep, onNext }: { item: IntroStep; currentStep
             <DotIndicator key={i} active={i === currentStep} />
           ))}
         </View>
-        <TouchableOpacity style={styles.button} onPress={onNext} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>{item.buttonText}</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-function NameCard({ name, onNameChange, onSubmit }: { name: string; onNameChange: (v: string) => void; onSubmit: () => void }) {
+function NameCard({ name, onNameChange }: { name: string; onNameChange: (v: string) => void }) {
   return (
     <KeyboardAvoidingView style={styles.step} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.nameContent}>
@@ -98,23 +95,15 @@ function NameCard({ name, onNameChange, onSubmit }: { name: string; onNameChange
           value={name}
           onChangeText={onNameChange}
           returnKeyType="done"
-          onSubmitEditing={onSubmit}
           autoCorrect={false}
           autoCapitalize="words"
         />
-        <TouchableOpacity
-          style={[styles.button, !name.trim() && styles.buttonDisabled]}
-          onPress={onSubmit}
-          activeOpacity={0.8}
-          disabled={!name.trim()}>
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-function WelcomeCard({ name, onFinish }: { name: string; onFinish: () => void }) {
+function WelcomeCard({ name }: { name: string }) {
   return (
     <View style={[styles.step, styles.welcomeStep]}>
       <View style={styles.welcomeContent}>
@@ -125,9 +114,6 @@ function WelcomeCard({ name, onFinish }: { name: string; onFinish: () => void })
         <Text style={styles.welcomeSubtitle}>
           Pull a card, answer with confidence, and let the chaos begin.
         </Text>
-        <TouchableOpacity style={[styles.button, styles.welcomeButton]} onPress={onFinish} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>Let's Go!</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -150,12 +136,35 @@ export default function OnboardingScreen() {
   const handleSubmit  = useCallback(() => { if (name.trim()) goToStep(currentStep + 1); }, [name, currentStep, goToStep]);
   const handleFinish  = useCallback(() => setSnackbarVisible(true), []);
 
+  const getButtonText = useCallback(() => {
+    const step = STEPS[currentStep];
+    if (step.type === 'intro') return (step as IntroStep).buttonText;
+    if (step.type === 'name') return 'Submit';
+    if (step.type === 'welcome') return "Let's Go!";
+    return '';
+  }, [currentStep]);
+
+  const getButtonDisabled = useCallback(() => {
+    return currentStep === 3 && !name.trim();
+  }, [currentStep, name]);
+
+  const handleButtonPress = useCallback(() => {
+    if (currentStep < STEPS.length - 1) {
+      if (currentStep === 3) {
+        if (!name.trim()) return;
+      }
+      goToStep(currentStep + 1);
+    } else {
+      setSnackbarVisible(true);
+    }
+  }, [currentStep, name, goToStep]);
+
   const renderItem = useCallback(({ item }: ListRenderItemInfo<Step>) => {
-    if (item.type === 'intro')   return <IntroCard   item={item} currentStep={currentStep} onNext={handleNext} />;
-    if (item.type === 'name')    return <NameCard    name={name} onNameChange={setName} onSubmit={handleSubmit} />;
-    if (item.type === 'welcome') return <WelcomeCard name={name} onFinish={handleFinish} />;
+    if (item.type === 'intro')   return <IntroCard   item={item} currentStep={currentStep} />;
+    if (item.type === 'name')    return <NameCard    name={name} onNameChange={setName} />;
+    if (item.type === 'welcome') return <WelcomeCard name={name} />;
     return null;
-  }, [currentStep, name, handleNext, handleSubmit, handleFinish]);
+  }, [currentStep, name]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -172,6 +181,15 @@ export default function OnboardingScreen() {
         showsHorizontalScrollIndicator={false}
         style={styles.flatList}
       />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, getButtonDisabled() && styles.buttonDisabled]}
+          onPress={handleButtonPress}
+          activeOpacity={0.8}
+          disabled={getButtonDisabled()}>
+          <Text style={styles.buttonText}>{getButtonText()}</Text>
+        </TouchableOpacity>
+      </View>
       <Snackbar visible={snackbarVisible} message="You're on the last page" />
     </SafeAreaView>
   );
@@ -186,6 +204,10 @@ const styles = StyleSheet.create({
   },
   flatList: {
     flex: 1,
+  },
+  buttonContainer: {
+    paddingHorizontal: Tokens.spacing[6],
+    paddingBottom: Tokens.spacing[6],
   },
 
   // ── Shared ──
@@ -220,6 +242,7 @@ const styles = StyleSheet.create({
     paddingTop: Tokens.spacing[6],
     paddingBottom: Tokens.spacing[6],
     alignItems: 'center',
+    justifyContent: 'center',
   },
   titleLine1: {
     fontSize: Tokens.typography.fontSize['4xl'],
@@ -245,9 +268,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Tokens.spacing[2],
     marginTop: Tokens.spacing[5],
-    marginBottom: Tokens.spacing[5],
-    flex: 1,
-    alignItems: 'flex-start',
   },
   dot: {
     height: 8,
@@ -259,7 +279,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Tokens.spacing[8],
     paddingTop: Tokens.spacing[32],
-    paddingBottom: Tokens.spacing[8],
     justifyContent: 'center',
   },
   nameTitle: {
@@ -307,8 +326,5 @@ const styles = StyleSheet.create({
     color: Tokens.colors.zinc[500],
     textAlign: 'center',
     lineHeight: Tokens.typography.lineHeight[3],
-  },
-  welcomeButton: {
-    marginTop: Tokens.spacing[10],
   },
 });
