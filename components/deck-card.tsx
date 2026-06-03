@@ -70,7 +70,7 @@ export function DeckCard({
   useEffect(() => {
     buttonTranslateY.value = withTiming(isActive ? 0 : 60, {
       duration: 400,
-      easing: Easing.in(Easing.cubic),
+      easing: Easing.out(Easing.cubic),
     });
   }, [isActive, buttonTranslateY]);
 
