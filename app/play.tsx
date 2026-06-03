@@ -148,11 +148,11 @@ export default function PlayScreen() {
           horizontal
           style={styles.carousel}
           showsHorizontalScrollIndicator={false}
-          // Snap to one card per swipe: even fast swipes only advance to next card.
-          // Low deceleration rate ensures momentum doesn't overshoot.
+          // Smooth snapping with momentum: the carousel decelerates smoothly
+          // to the nearest card boundary, then snaps with easing.
           snapToInterval={ITEM_SIZE}
           snapToAlignment="start"
-          decelerationRate={0.7}
+          decelerationRate={0.9}
           // `bounces` gives soft resistance at first/last card edges.
           bounces
           scrollEventThrottle={16}
@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
   carousel: {
     height: CAROUSEL_HEIGHT,
     flexGrow: 0,
+    paddingBottom: Tokens.spacing[8],
   },
   carouselContent: {
     alignItems: "center",
