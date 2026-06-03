@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nameTitle: {
-    fontSize: Tokens.typography.fontSize['2xl'],
+    fontSize: Tokens.typography.fontSize['4xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
     marginBottom: Tokens.spacing[2],
