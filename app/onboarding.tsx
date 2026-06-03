@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     fontSize: Tokens.typography.fontSize.lg,
     fontWeight: Tokens.typography.fontWeight.normal,
     color: Tokens.colors.neutral[400],
-    marginBottom: Tokens.spacing[8],
+    marginBottom: Tokens.spacing[6],
   },
   textInput: {
     fontSize: Tokens.typography.fontSize.base,
