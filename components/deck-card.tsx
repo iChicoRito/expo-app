@@ -161,8 +161,8 @@ const styles = StyleSheet.create({
   },
   title: {
     flexShrink: 1,
-    fontSize: Tokens.typography.fontSize["4xl"],
-    lineHeight: Tokens.typography.lineHeight[6],
+    fontSize: Tokens.typography.fontSize["6xl"],
+    lineHeight: Tokens.typography.lineHeight[8],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
   },
