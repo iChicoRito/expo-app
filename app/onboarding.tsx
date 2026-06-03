@@ -123,18 +123,20 @@ export default function OnboardingScreen() {
     if (step.type === 'name') {
       return (
         <FadeContent key={step.key}>
-          <Text style={styles.nameTitle}>What should we call you?</Text>
-          <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter your name"
-            placeholderTextColor={Tokens.colors.zinc[400]}
-            value={name}
-            onChangeText={setName}
-            returnKeyType="done"
-            autoCorrect={false}
-            autoCapitalize="words"
-          />
+          <View style={styles.nameFormContainer}>
+            <Text style={styles.nameTitle}>What should we call you?</Text>
+            <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter your name"
+              placeholderTextColor={Tokens.colors.zinc[400]}
+              value={name}
+              onChangeText={setName}
+              returnKeyType="done"
+              autoCorrect={false}
+              autoCapitalize="words"
+            />
+          </View>
         </FadeContent>
       );
     }
@@ -224,7 +226,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nameContentArea: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   welcomeContentArea: {
     alignItems: 'center',
@@ -285,17 +289,24 @@ const styles = StyleSheet.create({
   },
 
   // ── Name content ──
+  nameFormContainer: {
+    width: '100%',
+    paddingHorizontal: Tokens.spacing[8],
+    alignItems: 'center',
+  },
   nameTitle: {
     fontSize: Tokens.typography.fontSize['2xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
     marginBottom: Tokens.spacing[2],
+    textAlign: 'center',
   },
   nameSubtitle: {
     fontSize: Tokens.typography.fontSize.lg,
     fontWeight: Tokens.typography.fontWeight.normal,
     color: Tokens.colors.neutral[400],
     marginBottom: Tokens.spacing[6],
+    textAlign: 'center',
   },
   textInput: {
     fontSize: Tokens.typography.fontSize.base,
@@ -306,6 +317,7 @@ const styles = StyleSheet.create({
     paddingVertical: Tokens.spacing[4],
     paddingHorizontal: Tokens.spacing[4],
     marginBottom: Tokens.spacing[8],
+    width: '100%',
   },
 
   // ── Welcome content ──
