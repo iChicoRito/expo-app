@@ -65,6 +65,13 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
+        <Link href="/onboarding">
+          <Link.Trigger>
+            <ThemedText type="subtitle">Preview Onboarding →</ThemedText>
+          </Link.Trigger>
+        </Link>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
         <ThemedText>
           {`When you're ready, run `}

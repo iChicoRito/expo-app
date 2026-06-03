@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
 
   // ── Button ──
   buttonContainer: {
-    paddingHorizontal: Tokens.spacing[6],
+    paddingHorizontal: Tokens.spacing[8],
     paddingBottom: Tokens.spacing[6],
   },
   button: {
@@ -334,13 +334,11 @@ const styles = StyleSheet.create({
   // ── Name content ──
   nameFormWrapper: {
     flex: 1,
-    paddingHorizontal: Tokens.spacing[6],
     justifyContent: "center",
-    alignItems: "center",
   },
   nameFormContainer: {
     width: "100%",
-    justifyContent: "center",
+    alignItems: "flex-start",
   },
   nameTitle: {
     fontSize: Tokens.typography.fontSize["4xl"],
@@ -374,7 +372,7 @@ const styles = StyleSheet.create({
 
   // ── Welcome content ──
   welcomeTitle: {
-    fontSize: Tokens.typography.fontSize["4xl"],
+    fontSize: Tokens.typography.fontSize["5xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
     textAlign: "center",
@@ -385,7 +383,7 @@ const styles = StyleSheet.create({
     color: Tokens.colors.teal[500],
   },
   welcomeSubtitle: {
-    fontSize: Tokens.typography.fontSize.sm,
+    fontSize: Tokens.typography.fontSize.lg,
     color: Tokens.colors.zinc[500],
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[3],
