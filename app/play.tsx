@@ -7,8 +7,11 @@ import {
   WinkIcon,
 } from "@hugeicons/core-free-icons";
 import { useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   Dimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   StyleSheet,
   Text,
   View,
@@ -85,12 +88,24 @@ const DECKS: DeckData[] = [
 export default function PlayScreen() {
   const { name } = useLocalSearchParams<{ name?: string }>();
   const displayName = name?.trim() || "Friend";
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Live scroll offset, shared with each card and dots for real-time animation
+  // Live scroll offset, shared with each card so its scale/opacity/shadow can be
+  // interpolated on the UI thread for jank-free, finger-tracking motion.
   const scrollX = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollX.value = event.contentOffset.x;
   });
+
+  // The active index is a discrete value (drives the Play button), so it only
+  // needs to update once momentum settles on a snapped card.
+  const handleMomentumEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const idx = Math.round(e.nativeEvent.contentOffset.x / ITEM_SIZE);
+      setActiveIndex(Math.max(0, Math.min(idx, DECKS.length - 1)));
+    },
+    [],
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -133,12 +148,16 @@ export default function PlayScreen() {
           horizontal
           style={styles.carousel}
           showsHorizontalScrollIndicator={false}
+          // Smooth snapping with momentum: the carousel decelerates smoothly
+          // to the nearest card boundary, then snaps with easing.
           snapToInterval={ITEM_SIZE}
           snapToAlignment="start"
-          decelerationRate={0.7}
+          decelerationRate={0.9}
+          // `bounces` gives soft resistance at first/last card edges.
           bounces
           scrollEventThrottle={16}
           onScroll={scrollHandler}
+          onMomentumScrollEnd={handleMomentumEnd}
           contentContainerStyle={[
             styles.carouselContent,
             { paddingHorizontal: SIDE_PAD },
@@ -152,6 +171,7 @@ export default function PlayScreen() {
               index={index}
               itemSize={ITEM_SIZE}
               scrollX={scrollX}
+              isActive={index === activeIndex}
             />
           )}
         />
@@ -159,13 +179,7 @@ export default function PlayScreen() {
         {/* Page dots */}
         <View style={styles.dotsRow}>
           {DECKS.map((deck, i) => (
-            <DotIndicator
-              key={deck.id}
-              index={i}
-              scrollX={scrollX}
-              itemSize={ITEM_SIZE}
-              totalItems={DECKS.length}
-            />
+            <DotIndicator key={deck.id} active={i === activeIndex} />
           ))}
         </View>
       </View>

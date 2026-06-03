@@ -1,11 +1,15 @@
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
+  Easing,
   Extrapolation,
   interpolate,
   type SharedValue,
   useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
+import { useEffect } from "react";
 import Svg, { Path } from "react-native-svg";
 
 import { DiamondGrid } from "@/components/diamond-grid";
@@ -29,6 +33,8 @@ type Props = {
   itemSize: number;
   /** Live horizontal scroll offset, driven on the UI thread. */
   scrollX: SharedValue<number>;
+  /** Whether this card is the resolved active (centered) card — drives the Play button. */
+  isActive: boolean;
 };
 
 /** Blend a #rrggbb color toward black (amt<0) or white (amt>0) by |amt| (0..1). */
@@ -50,6 +56,7 @@ export function DeckCard({
   index,
   itemSize,
   scrollX,
+  isActive,
 }: Props) {
   const borderColor = mix(deck.bgColor, 0.3);
   const darkBand = mix(deck.bgColor, -0.12);
@@ -59,26 +66,32 @@ export function DeckCard({
   const wavePath = `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`;
   const waveLinePath = `M0 0 Q${width / 2} ${dip} ${width} 0`;
 
-  // The card is centered when scrollX === index * itemSize. We interpolate scale,
-  // opacity, and button animations against the same input range for perfect sync.
+  // Button slide-up + fade animation: starts 60px below with 0 opacity, animates to 0 translateY and 1 opacity when active
+  const buttonTranslateY = useSharedValue(60);
+  const buttonOpacity = useSharedValue(0);
+  useEffect(() => {
+    buttonTranslateY.value = withTiming(isActive ? 0 : 60, {
+      duration: 400,
+      easing: Easing.out(Easing.cubic),
+    });
+    buttonOpacity.value = withTiming(isActive ? 1 : 0, {
+      duration: 400,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [isActive, buttonTranslateY, buttonOpacity]);
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: buttonTranslateY.value }],
+    opacity: buttonOpacity.value,
+  }));
+
+  // The card is centered when scrollX === index * itemSize. We interpolate scale
+  // and opacity against the same input range so both share one continuous ease.
   const inputRange = [
     (index - 1) * itemSize,
     index * itemSize,
     (index + 1) * itemSize,
   ];
-
-  const buttonAnimatedStyle = useAnimatedStyle(() => {
-    const progress = interpolate(
-      scrollX.value,
-      inputRange,
-      [1, 0, 1],
-      Extrapolation.CLAMP,
-    );
-    return {
-      transform: [{ translateY: interpolate(progress, [0, 1], [0, 60]) }],
-      opacity: interpolate(progress, [0, 1], [1, 0]),
-    };
-  });
 
   const animatedWrapperStyle = useAnimatedStyle(() => {
     const scale = interpolate(
@@ -147,7 +160,7 @@ export function DeckCard({
 
           <Animated.View
             style={buttonAnimatedStyle}
-            pointerEvents="auto"
+            pointerEvents={isActive ? "auto" : "none"}
           >
             <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
               <Text style={[styles.playText, { color: deck.bgColor }]}>
