@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
   title: {
     flexShrink: 1,
     fontSize: Tokens.typography.fontSize["6xl"],
+    lineHeight: 24,
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
   },
