@@ -121,7 +121,8 @@ export default function GameScreen() {
 
       setIsTransitioning(true);
 
-      // Exit: slide current card upward off-screen (ease-in = starts slow, accelerates).
+      // Exit: slide up + continue flip simultaneously so the card spins as it leaves.
+      flip.value = withTiming(2, { duration: 220, easing: Easing.in(Easing.cubic) });
       cardTranslateY.value = withTiming(
         -SCREEN_HEIGHT,
         { duration: 220, easing: Easing.in(Easing.cubic) },
