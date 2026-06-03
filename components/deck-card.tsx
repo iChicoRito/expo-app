@@ -65,17 +65,23 @@ export function DeckCard({
   const wavePath = `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`;
   const waveLinePath = `M0 0 Q${width / 2} ${dip} ${width} 0`;
 
-  // Button slide-up animation: starts 60px below, animates to 0 when active
+  // Button slide-up + fade animation: starts 60px below with 0 opacity, animates to 0 translateY and 1 opacity when active
   const buttonTranslateY = useSharedValue(60);
+  const buttonOpacity = useSharedValue(0);
   useEffect(() => {
     buttonTranslateY.value = withTiming(isActive ? 0 : 60, {
       duration: 400,
       easing: Easing.out(Easing.cubic),
     });
-  }, [isActive, buttonTranslateY]);
+    buttonOpacity.value = withTiming(isActive ? 1 : 0, {
+      duration: 400,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [isActive, buttonTranslateY, buttonOpacity]);
 
   const buttonAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: buttonTranslateY.value }],
+    opacity: buttonOpacity.value,
   }));
 
   // The card is centered when scrollX === index * itemSize. We interpolate scale
@@ -137,14 +143,15 @@ export function DeckCard({
             </View>
           </View>
 
-          <Animated.View style={buttonAnimatedStyle}>
-            {isActive && (
-              <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
-                <Text style={[styles.playText, { color: deck.bgColor }]}>
-                  Play
-                </Text>
-              </TouchableOpacity>
-            )}
+          <Animated.View
+            style={buttonAnimatedStyle}
+            pointerEvents={isActive ? "auto" : "none"}
+          >
+            <TouchableOpacity style={styles.playButton} activeOpacity={0.85}>
+              <Text style={[styles.playText, { color: deck.bgColor }]}>
+                Play
+              </Text>
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </View>
