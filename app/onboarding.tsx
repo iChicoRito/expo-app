@@ -300,9 +300,11 @@ const styles = StyleSheet.create({
   textInput: {
     fontSize: Tokens.typography.fontSize.base,
     color: Tokens.colors.zinc[900],
-    borderBottomWidth: Tokens.effects.borderWidth.default,
-    borderBottomColor: Tokens.colors.zinc[300],
-    paddingVertical: Tokens.spacing[3],
+    borderWidth: Tokens.effects.borderWidth.default,
+    borderColor: Tokens.colors.zinc[300],
+    borderRadius: Tokens.layout.borderRadius.xl,
+    paddingVertical: Tokens.spacing[4],
+    paddingHorizontal: Tokens.spacing[4],
     marginBottom: Tokens.spacing[8],
   },
 
