@@ -91,7 +91,9 @@ export function DeckCard({
     >
       <View style={[styles.card, { backgroundColor: deck.bgColor }]}>
         {/* Diamond-grid texture */}
-        <DiamondGrid width={width} height={height} />
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <DiamondGrid width={width} height={height} />
+        </View>
 
         {/* Curved darker band near the bottom */}
         <Svg
