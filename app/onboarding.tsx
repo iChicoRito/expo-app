@@ -286,14 +286,14 @@ const styles = StyleSheet.create({
 
   // ── Name content ──
   nameTitle: {
-    fontSize: Tokens.typography.fontSize['3xl'],
+    fontSize: Tokens.typography.fontSize['2xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
-    lineHeight: Tokens.typography.lineHeight[7],
     marginBottom: Tokens.spacing[2],
   },
   nameSubtitle: {
-    fontSize: Tokens.typography.fontSize.sm,
+    fontSize: Tokens.typography.fontSize.lg,
+    fontWeight: Tokens.typography.fontWeight.normal,
     color: Tokens.colors.neutral[400],
     marginBottom: Tokens.spacing[8],
   },
