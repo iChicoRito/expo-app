@@ -99,8 +99,8 @@ export default function GameScreen() {
   const cardBlurStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
       cardTranslateY.value,
-      [0, -SCREEN_HEIGHT / 2, -SCREEN_HEIGHT],
-      [0, 0.5, 1],
+      [0, -SCREEN_HEIGHT * 0.3, -SCREEN_HEIGHT],
+      [0, 0.7, 1],
     ),
   }));
 
@@ -297,7 +297,7 @@ export default function GameScreen() {
         </Pressable>
         {/* Motion blur overlay */}
         <Animated.View style={[styles.blurOverlay, cardBlurStyle]} pointerEvents="none">
-          <BlurView intensity={12} />
+          <BlurView intensity={30} />
         </Animated.View>
         </Animated.View>
 
