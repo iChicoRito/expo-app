@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   nameFormWrapper: {
     flex: 1,
     paddingHorizontal: Tokens.spacing[8],
-    paddingTop: Tokens.spacing[8],
+    justifyContent: "center",
   },
   nameFormContainer: {
     width: "100%",
