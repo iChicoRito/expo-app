@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   nameSubtitle: {
     fontSize: Tokens.typography.fontSize.sm,
-    color: Tokens.colors.zinc[500],
+    color: Tokens.colors.neutral[400],
     marginBottom: Tokens.spacing[8],
   },
   textInput: {
