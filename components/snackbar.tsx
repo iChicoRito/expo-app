@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Tokens.colors.zinc[800],
+    backgroundColor: Tokens.colors.teal[700],
     paddingVertical: Tokens.spacing[4],
     paddingHorizontal: Tokens.spacing[6],
     borderTopLeftRadius: Tokens.layout.borderRadius['2xl'],
