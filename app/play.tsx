@@ -258,7 +258,9 @@ const styles = StyleSheet.create({
   // ── Carousel ──
   carouselWrapper: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    // Headroom so the scaled-up (1.1x) active card keeps clearance from the label.
+    paddingTop: Tokens.spacing[5],
   },
   carouselContent: {
     alignItems: "center",
