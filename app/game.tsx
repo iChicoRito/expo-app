@@ -18,12 +18,15 @@ import {
   View,
 } from "react-native";
 import Animated, {
+  Easing,
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
 
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
@@ -58,6 +61,10 @@ export default function GameScreen() {
   const [answeredCount, setAnsweredCount] = useState(0);
   const [passedCount, setPassedCount] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(TIMER_SECONDS);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Card slide transition: 0 = on-screen, negative = above screen, positive = below screen.
+  const cardTranslateY = useSharedValue(0);
 
   // Card flip: 0 = front (unflipped), 1 = back (question revealed).
   const flip = useSharedValue(0);
@@ -85,6 +92,18 @@ export default function GameScreen() {
     width: `${interpolate(progressValue.value, [0, total], [0, 100])}%`,
   }));
 
+  const cardSlideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: cardTranslateY.value }],
+  }));
+
+  const cardBlurStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      cardTranslateY.value,
+      [0, -SCREEN_HEIGHT * 0.3, -SCREEN_HEIGHT],
+      [0, 0.7, 1],
+    ),
+  }));
+
   const goToResults = useCallback(
     (answered: number, passed: number) => {
       router.replace({
@@ -108,14 +127,40 @@ export default function GameScreen() {
         goToResults(answered, passed);
         return;
       }
-      setAnsweredCount(answered);
-      setPassedCount(passed);
-      setCurrentIndex(currentIndex + 1);
-      setFlipped(false);
-      setSecondsLeft(TIMER_SECONDS);
-      flip.value = 0;
+
+      setIsTransitioning(true);
+
+      // Exit: slide up + continue flip simultaneously so the card spins as it leaves.
+      flip.value = withTiming(2, { duration: 350, easing: Easing.in(Easing.cubic) });
+      cardTranslateY.value = withTiming(
+        -SCREEN_HEIGHT,
+        { duration: 350, easing: Easing.in(Easing.cubic) },
+        (finished) => {
+          if (!finished) return;
+
+          // Card is off-screen — reset flip and reposition below screen instantly.
+          flip.value = 0;
+          cardTranslateY.value = SCREEN_HEIGHT;
+
+          // Advance state on JS thread.
+          runOnJS(setAnsweredCount)(answered);
+          runOnJS(setPassedCount)(passed);
+          runOnJS(setCurrentIndex)(currentIndex + 1);
+          runOnJS(setFlipped)(false);
+          runOnJS(setSecondsLeft)(TIMER_SECONDS);
+
+          // Entrance: slide next card up from below into center (ease-out = decelerates to stop).
+          cardTranslateY.value = withTiming(
+            0,
+            { duration: 280, easing: Easing.out(Easing.cubic) },
+            (entranceFinished) => {
+              if (entranceFinished) runOnJS(setIsTransitioning)(false);
+            },
+          );
+        },
+      );
     },
-    [currentIndex, total, goToResults, flip],
+    [currentIndex, total, goToResults, flip, cardTranslateY],
   );
 
   const handleFlip = () => {
@@ -209,8 +254,9 @@ export default function GameScreen() {
         </View>
 
         {/* Flip card */}
-        <Pressable onPress={handleFlip} disabled={flipped}>
-          <View style={styles.cardSizer}>
+        <Animated.View style={cardSlideStyle}>
+          <Pressable onPress={handleFlip} disabled={flipped || isTransitioning}>
+            <View style={styles.cardSizer}>
             {/* Front — unflipped */}
             <Animated.View style={[styles.cardFace, frontStyle]}>
               <View
@@ -244,11 +290,16 @@ export default function GameScreen() {
               style={[styles.cardFace, styles.cardBack, backStyle]}
             >
               <Text style={styles.questionText}>
-                “{questions[currentIndex]}”
+                {questions[currentIndex]}
               </Text>
             </Animated.View>
           </View>
         </Pressable>
+        {/* Motion blur overlay */}
+        <Animated.View style={[styles.blurOverlay, cardBlurStyle]} pointerEvents="none">
+          <BlurView intensity={30} />
+        </Animated.View>
+        </Animated.View>
 
         {/* Progress bar */}
         <View style={styles.progressWrapper}>
@@ -264,7 +315,7 @@ export default function GameScreen() {
       {/* ── Actions (visible once flipped) ── */}
       <View style={styles.actionsSlot}>
         {flipped && (
-          <View style={styles.actionsRow}>
+          <View style={styles.actionsRow} pointerEvents={isTransitioning ? "none" : "auto"}>
             <ActionButton
               icon={Cancel01Icon}
               label="End Round"
@@ -322,13 +373,16 @@ const styles = StyleSheet.create({
 
   // ── Header ──
   header: {
+    position: "relative",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: Tokens.spacing[5],
     paddingTop: Tokens.spacing[2],
   },
   backButton: {
+    position: "absolute",
+    left: Tokens.spacing[5],
     flexDirection: "row",
     alignItems: "center",
     gap: Tokens.spacing[1],
@@ -407,6 +461,13 @@ const styles = StyleSheet.create({
   cardBack: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  blurOverlay: {
+    position: "absolute",
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 28,
+    overflow: "hidden",
   },
   deckPill: {
     flexDirection: "row",
