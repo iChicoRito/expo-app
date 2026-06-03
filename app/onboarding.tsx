@@ -258,8 +258,9 @@ const styles = StyleSheet.create({
   nameContent: {
     flex: 1,
     paddingHorizontal: Tokens.spacing[8],
-    paddingTop: Tokens.spacing[20],
+    paddingTop: Tokens.spacing[32],
     paddingBottom: Tokens.spacing[8],
+    justifyContent: 'center',
   },
   nameTitle: {
     fontSize: Tokens.typography.fontSize['3xl'],
