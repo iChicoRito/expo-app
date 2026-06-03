@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   // ── Deck section ──
   sectionLabel: {
     marginTop: Tokens.spacing[6],
-    marginBottom: Tokens.spacing[4],
+    marginBottom: Tokens.spacing[1],
     fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
     color: Tokens.colors.neutral[700],
@@ -259,8 +259,8 @@ const styles = StyleSheet.create({
   carouselWrapper: {
     flex: 1,
     justifyContent: "flex-start",
-    // Headroom so the scaled-up (1.1x) active card keeps clearance from the label.
-    paddingTop: Tokens.spacing[5],
+    // Small headroom so the scaled-up (1.1x) active card doesn't clip at the top.
+    paddingTop: Tokens.spacing[2],
   },
   carouselContent: {
     alignItems: "center",
