@@ -60,6 +60,10 @@ export default function GameScreen() {
   const [answeredCount, setAnsweredCount] = useState(0);
   const [passedCount, setPassedCount] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(TIMER_SECONDS);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Card slide transition: 0 = on-screen, negative = above screen, positive = below screen.
+  const cardTranslateY = useSharedValue(0);
 
   // Card flip: 0 = front (unflipped), 1 = back (question revealed).
   const flip = useSharedValue(0);
@@ -85,6 +89,10 @@ export default function GameScreen() {
 
   const progressBarStyle = useAnimatedStyle(() => ({
     width: `${interpolate(progressValue.value, [0, total], [0, 100])}%`,
+  }));
+
+  const cardSlideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: cardTranslateY.value }],
   }));
 
   const goToResults = useCallback(
