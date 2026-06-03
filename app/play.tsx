@@ -32,7 +32,7 @@ import { Tokens } from "@/constants/tokens";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.72;
 const CARD_HEIGHT = CARD_WIDTH * 1.4;
-const CARD_GAP = -20;
+const CARD_GAP = 8;
 const ITEM_SIZE = CARD_WIDTH + CARD_GAP;
 const SIDE_PAD = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 // Fixed track height with headroom so the scaled-up (1.1x) active card is not
@@ -148,11 +148,11 @@ export default function PlayScreen() {
           horizontal
           style={styles.carousel}
           showsHorizontalScrollIndicator={false}
-          // Smooth snapping with momentum: the carousel decelerates smoothly
-          // to the nearest card boundary, then snaps with easing.
+          // Snap to one card per swipe: even fast swipes only advance to next card.
+          // Low deceleration rate ensures momentum doesn't overshoot.
           snapToInterval={ITEM_SIZE}
           snapToAlignment="start"
-          decelerationRate={0.9}
+          decelerationRate={0.7}
           // `bounces` gives soft resistance at first/last card edges.
           bounces
           scrollEventThrottle={16}
