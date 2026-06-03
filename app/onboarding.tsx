@@ -123,23 +123,25 @@ export default function OnboardingScreen() {
     if (step.type === 'name') {
       return (
         <FadeContent key={step.key}>
-          <View style={styles.nameFormContainer}>
-            <Text style={styles.nameTitle}>
-              What should{' '}
-              <Text style={styles.nameTitleAccent}>we call you?</Text>
-            </Text>
-            <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
+          <View style={styles.nameFormWrapper}>
+            <View style={styles.nameFormContainer}>
+              <Text style={styles.nameTitle}>
+                What should{' '}
+                <Text style={styles.nameTitleAccent}>we call you?</Text>
+              </Text>
+              <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
+            </View>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter your name"
+              placeholderTextColor={Tokens.colors.zinc[400]}
+              value={name}
+              onChangeText={setName}
+              returnKeyType="done"
+              autoCorrect={false}
+              autoCapitalize="words"
+            />
           </View>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter your name"
-            placeholderTextColor={Tokens.colors.zinc[400]}
-            value={name}
-            onChangeText={setName}
-            returnKeyType="done"
-            autoCorrect={false}
-            autoCapitalize="words"
-          />
         </FadeContent>
       );
     }
@@ -292,6 +294,10 @@ const styles = StyleSheet.create({
   },
 
   // ── Name content ──
+  nameFormWrapper: {
+    width: '100%',
+    alignItems: 'center',
+  },
   nameFormContainer: {
     width: '100%',
     paddingHorizontal: Tokens.spacing[8],
