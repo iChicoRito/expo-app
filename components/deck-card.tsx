@@ -1,6 +1,7 @@
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
+  Easing,
   Extrapolation,
   interpolate,
   type SharedValue,
@@ -69,10 +70,7 @@ export function DeckCard({
   useEffect(() => {
     buttonTranslateY.value = withTiming(isActive ? 0 : 60, {
       duration: 400,
-      easing: (progress) => {
-        // ease-in: smooth slow start, faster end
-        return progress * progress;
-      },
+      easing: Easing.in(Easing.cubic),
     });
   }, [isActive, buttonTranslateY]);
 
