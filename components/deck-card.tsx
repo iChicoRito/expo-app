@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 28,
     overflow: "hidden",
-    borderWidth: 3,
+    borderWidth: 6,
     borderColor: Tokens.colors.white,
     shadowColor: Tokens.colors.black,
     shadowOffset: { width: 0, height: 8 },
