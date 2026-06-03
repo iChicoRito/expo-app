@@ -32,7 +32,7 @@ import { Tokens } from "@/constants/tokens";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.72;
 const CARD_HEIGHT = CARD_WIDTH * 1.4;
-const CARD_GAP = 16;
+const CARD_GAP = 8;
 const ITEM_SIZE = CARD_WIDTH + CARD_GAP;
 const SIDE_PAD = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 // Fixed track height with headroom so the scaled-up (1.1x) active card is not
