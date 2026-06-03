@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   // ── Intro step ──
   mascotArea: {
     height: MASCOT_HEIGHT,
-    backgroundColor: Tokens.colors.teal[50],
+    backgroundColor: Tokens.colors.white,
   },
   introContent: {
     flex: 1,
