@@ -129,17 +129,17 @@ export default function OnboardingScreen() {
               <Text style={styles.nameTitleAccent}>we call you?</Text>
             </Text>
             <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your name"
-              placeholderTextColor={Tokens.colors.zinc[400]}
-              value={name}
-              onChangeText={setName}
-              returnKeyType="done"
-              autoCorrect={false}
-              autoCapitalize="words"
-            />
           </View>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter your name"
+            placeholderTextColor={Tokens.colors.zinc[400]}
+            value={name}
+            onChangeText={setName}
+            returnKeyType="done"
+            autoCorrect={false}
+            autoCapitalize="words"
+          />
         </FadeContent>
       );
     }
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     borderColor: Tokens.colors.zinc[300],
     borderRadius: Tokens.layout.borderRadius.xl,
     paddingVertical: Tokens.spacing[4],
-    paddingHorizontal: Tokens.spacing[4],
+    paddingHorizontal: Tokens.spacing[8],
     marginBottom: Tokens.spacing[8],
     width: '100%',
   },
