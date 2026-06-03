@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Dimensions,
-  FlatList,
   KeyboardAvoidingView,
-  ListRenderItemInfo,
   Platform,
   StyleSheet,
   Text,
@@ -23,7 +21,7 @@ import Animated, {
 import { Tokens } from '@/constants/tokens';
 import { Snackbar } from '@/components/snackbar';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.52;
 const INTRO_COUNT = 3;
 
@@ -62,134 +60,136 @@ function DotIndicator({ active }: { active: boolean }) {
   return <Animated.View style={[styles.dot, animatedStyle]} />;
 }
 
-// ─── Step cards ──────────────────────────────────────────────────────────────
+// ─── Animated content wrapper ─────────────────────────────────────────────────
 
-function IntroCard({ item, currentStep }: { item: IntroStep; currentStep: number }) {
-  return (
-    <View style={styles.step}>
-      <View style={styles.mascotArea} />
-      <View style={styles.introContent}>
-        <Text style={styles.titleLine1}>{item.titleLine1}</Text>
-        <Text style={styles.titleLine2}>{item.titleLine2}</Text>
-        <Text style={styles.introSubtitle}>{item.subtitle}</Text>
-        <View style={styles.dotsRow}>
-          {Array.from({ length: INTRO_COUNT }).map((_, i) => (
-            <DotIndicator key={i} active={i === currentStep} />
-          ))}
-        </View>
-      </View>
-    </View>
-  );
-}
+function FadeContent({ stepKey, children }: { stepKey: string; children: React.ReactNode }) {
+  const opacity = useSharedValue(0);
 
-function NameCard({ name, onNameChange }: { name: string; onNameChange: (v: string) => void }) {
-  return (
-    <KeyboardAvoidingView style={styles.step} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <View style={styles.nameContent}>
-        <Text style={styles.nameTitle}>What should we call you?</Text>
-        <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Enter your name"
-          placeholderTextColor={Tokens.colors.zinc[400]}
-          value={name}
-          onChangeText={onNameChange}
-          returnKeyType="done"
-          autoCorrect={false}
-          autoCapitalize="words"
-        />
-      </View>
-    </KeyboardAvoidingView>
-  );
-}
+  useEffect(() => {
+    opacity.value = 0;
+    opacity.value = withTiming(1, { duration: 300 });
+  }, [stepKey, opacity]);
 
-function WelcomeCard({ name }: { name: string }) {
-  return (
-    <View style={[styles.step, styles.welcomeStep]}>
-      <View style={styles.welcomeContent}>
-        <Text style={styles.welcomeTitle}>
-          {"Let's Start\nSpilling, "}
-          <Text style={styles.welcomeName}>{name.trim() || 'Friend'}</Text>
-        </Text>
-        <Text style={styles.welcomeSubtitle}>
-          Pull a card, answer with confidence, and let the chaos begin.
-        </Text>
-      </View>
-    </View>
-  );
+  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
-  const [currentStep, setCurrentStep]       = useState(0);
-  const [name, setName]                     = useState('');
+  const [currentStep, setCurrentStep]         = useState(0);
+  const [name, setName]                       = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const flatListRef = useRef<FlatList<Step>>(null);
 
-  const goToStep = useCallback((index: number) => {
-    flatListRef.current?.scrollToIndex({ index, animated: true });
-    setCurrentStep(index);
-  }, []);
-
-  const handleNext    = useCallback(() => goToStep(currentStep + 1), [currentStep, goToStep]);
-  const handleSubmit  = useCallback(() => { if (name.trim()) goToStep(currentStep + 1); }, [name, currentStep, goToStep]);
-  const handleFinish  = useCallback(() => setSnackbarVisible(true), []);
+  const step = STEPS[currentStep];
 
   const getButtonText = useCallback(() => {
-    const step = STEPS[currentStep];
     if (step.type === 'intro') return (step as IntroStep).buttonText;
     if (step.type === 'name') return 'Submit';
-    if (step.type === 'welcome') return "Let's Go!";
-    return '';
-  }, [currentStep]);
+    return "Let's Go!";
+  }, [step]);
 
   const getButtonDisabled = useCallback(() => {
-    return currentStep === 3 && !name.trim();
-  }, [currentStep, name]);
+    return step.type === 'name' && !name.trim();
+  }, [step, name]);
 
   const handleButtonPress = useCallback(() => {
+    if (step.type === 'name' && !name.trim()) return;
     if (currentStep < STEPS.length - 1) {
-      if (currentStep === 3) {
-        if (!name.trim()) return;
-      }
-      goToStep(currentStep + 1);
+      setCurrentStep(currentStep + 1);
     } else {
       setSnackbarVisible(true);
     }
-  }, [currentStep, name, goToStep]);
+  }, [currentStep, step, name]);
 
-  const renderItem = useCallback(({ item }: ListRenderItemInfo<Step>) => {
-    if (item.type === 'intro')   return <IntroCard   item={item} currentStep={currentStep} />;
-    if (item.type === 'name')    return <NameCard    name={name} onNameChange={setName} />;
-    if (item.type === 'welcome') return <WelcomeCard name={name} />;
+  const renderContent = () => {
+    if (step.type === 'intro') {
+      return (
+        <FadeContent stepKey={step.key}>
+          <Text style={styles.titleLine1}>{step.titleLine1}</Text>
+          <Text style={styles.titleLine2}>{step.titleLine2}</Text>
+          <Text style={styles.introSubtitle}>{step.subtitle}</Text>
+          <View style={styles.dotsRow}>
+            {Array.from({ length: INTRO_COUNT }).map((_, i) => (
+              <DotIndicator key={i} active={i === currentStep} />
+            ))}
+          </View>
+        </FadeContent>
+      );
+    }
+
+    if (step.type === 'name') {
+      return (
+        <FadeContent stepKey={step.key}>
+          <Text style={styles.nameTitle}>What should we call you?</Text>
+          <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter your name"
+            placeholderTextColor={Tokens.colors.zinc[400]}
+            value={name}
+            onChangeText={setName}
+            returnKeyType="done"
+            autoCorrect={false}
+            autoCapitalize="words"
+          />
+        </FadeContent>
+      );
+    }
+
+    if (step.type === 'welcome') {
+      return (
+        <FadeContent stepKey={step.key}>
+          <Text style={styles.welcomeTitle}>
+            {"Let's Start\nSpilling, "}
+            <Text style={styles.welcomeName}>{name.trim() || 'Friend'}</Text>
+          </Text>
+          <Text style={styles.welcomeSubtitle}>
+            Pull a card, answer with confidence, and let the chaos begin.
+          </Text>
+        </FadeContent>
+      );
+    }
+
     return null;
-  }, [currentStep, name]);
+  };
+
+  const isIntro   = step.type === 'intro';
+  const isName    = step.type === 'name';
+  const isWelcome = step.type === 'welcome';
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={STEPS}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.key}
-        extraData={{ currentStep, name }}
-        getItemLayout={(_, index) => ({ length: SCREEN_WIDTH, offset: SCREEN_WIDTH * index, index })}
-        horizontal
-        pagingEnabled
-        scrollEnabled={false}
-        showsHorizontalScrollIndicator={false}
-        style={styles.flatList}
-      />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, getButtonDisabled() && styles.buttonDisabled]}
-          onPress={handleButtonPress}
-          activeOpacity={0.8}
-          disabled={getButtonDisabled()}>
-          <Text style={styles.buttonText}>{getButtonText()}</Text>
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
+        {/* Mascot area — only on intro screens */}
+        {isIntro && <View style={styles.mascotArea} />}
+
+        {/* Content area */}
+        <View style={[
+          styles.contentArea,
+          isIntro   && styles.introContentArea,
+          isName    && styles.nameContentArea,
+          isWelcome && styles.welcomeContentArea,
+        ]}>
+          {renderContent()}
+        </View>
+
+        {/* Button — always fixed */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, getButtonDisabled() && styles.buttonDisabled]}
+            onPress={handleButtonPress}
+            activeOpacity={0.8}
+            disabled={getButtonDisabled()}>
+            <Text style={styles.buttonText}>{getButtonText()}</Text>
+          </TouchableOpacity>
+        </View>
+
+      </KeyboardAvoidingView>
       <Snackbar visible={snackbarVisible} message="You're on the last page" />
     </SafeAreaView>
   );
@@ -202,18 +202,38 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Tokens.colors.white,
   },
-  flatList: {
+  flex: {
     flex: 1,
   },
+
+  // ── Mascot ──
+  mascotArea: {
+    height: MASCOT_HEIGHT,
+    backgroundColor: Tokens.colors.white,
+  },
+
+  // ── Content areas ──
+  contentArea: {
+    flex: 1,
+    paddingHorizontal: Tokens.spacing[8],
+  },
+  introContentArea: {
+    paddingTop: Tokens.spacing[6],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nameContentArea: {
+    justifyContent: 'center',
+  },
+  welcomeContentArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // ── Button ──
   buttonContainer: {
     paddingHorizontal: Tokens.spacing[6],
     paddingBottom: Tokens.spacing[6],
-  },
-
-  // ── Shared ──
-  step: {
-    width: SCREEN_WIDTH,
-    height: '100%',
   },
   button: {
     backgroundColor: Tokens.colors.teal[500],
@@ -231,19 +251,7 @@ const styles = StyleSheet.create({
     fontWeight: Tokens.typography.fontWeight.semibold,
   },
 
-  // ── Intro step ──
-  mascotArea: {
-    height: MASCOT_HEIGHT,
-    backgroundColor: Tokens.colors.white,
-  },
-  introContent: {
-    flex: 1,
-    paddingHorizontal: Tokens.spacing[8],
-    paddingTop: Tokens.spacing[6],
-    paddingBottom: Tokens.spacing[6],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // ── Intro content ──
   titleLine1: {
     fontSize: Tokens.typography.fontSize['4xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
@@ -274,13 +282,7 @@ const styles = StyleSheet.create({
     borderRadius: Tokens.layout.borderRadius.full,
   },
 
-  // ── Name input step ──
-  nameContent: {
-    flex: 1,
-    paddingHorizontal: Tokens.spacing[8],
-    paddingTop: Tokens.spacing[32],
-    justifyContent: 'center',
-  },
+  // ── Name content ──
   nameTitle: {
     fontSize: Tokens.typography.fontSize['3xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
@@ -302,14 +304,7 @@ const styles = StyleSheet.create({
     marginBottom: Tokens.spacing[8],
   },
 
-  // ── Welcome step ──
-  welcomeStep: {
-    justifyContent: 'center',
-  },
-  welcomeContent: {
-    paddingHorizontal: Tokens.spacing[8],
-    alignItems: 'center',
-  },
+  // ── Welcome content ──
   welcomeTitle: {
     fontSize: Tokens.typography.fontSize['4xl'],
     fontWeight: Tokens.typography.fontWeight.bold,
