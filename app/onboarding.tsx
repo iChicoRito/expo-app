@@ -29,15 +29,15 @@ const INTRO_COUNT = 3;
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
-type IntroStep   = { key: string; type: 'intro'; titleLine1: string; titleLine2: string; subtitle: string; buttonText: string; emoji: string };
+type IntroStep   = { key: string; type: 'intro'; titleLine1: string; titleLine2: string; subtitle: string; buttonText: string };
 type NameStep    = { key: string; type: 'name' };
 type WelcomeStep = { key: string; type: 'welcome' };
 type Step        = IntroStep | NameStep | WelcomeStep;
 
 const STEPS: Step[] = [
-  { key: '1', type: 'intro', titleLine1: 'Vibe',  titleLine2: 'Check',     subtitle: "Awkward silence gets cancelled before it even starts, bestie.",          buttonText: 'Okay',           emoji: '👋' },
-  { key: '2', type: 'intro', titleLine1: 'Tea',   titleLine2: 'Time',      subtitle: "Pick a card and let the group reveal their funniest, weirdest lore.",    buttonText: 'It sounds fun',  emoji: '🫖' },
-  { key: '3', type: 'intro', titleLine1: 'Main',  titleLine2: 'Character', subtitle: "Play with friends, dates, or anyone brave enough to answer.",             buttonText: 'Start Spilling', emoji: '⭐' },
+  { key: '1', type: 'intro', titleLine1: 'Vibe',  titleLine2: 'Check',     subtitle: "Awkward silence gets cancelled before it even starts, bestie.",          buttonText: 'Okay' },
+  { key: '2', type: 'intro', titleLine1: 'Tea',   titleLine2: 'Time',      subtitle: "Pick a card and let the group reveal their funniest, weirdest lore.",    buttonText: 'It sounds fun' },
+  { key: '3', type: 'intro', titleLine1: 'Main',  titleLine2: 'Character', subtitle: "Play with friends, dates, or anyone brave enough to answer.",             buttonText: 'Start Spilling' },
   { key: 'name',    type: 'name' },
   { key: 'welcome', type: 'welcome' },
 ];
@@ -67,9 +67,7 @@ function DotIndicator({ active }: { active: boolean }) {
 function IntroCard({ item, currentStep, onNext }: { item: IntroStep; currentStep: number; onNext: () => void }) {
   return (
     <View style={styles.step}>
-      <View style={styles.mascotArea}>
-        <Text style={styles.mascotEmoji}>{item.emoji}</Text>
-      </View>
+      <View style={styles.mascotArea} />
       <View style={styles.introContent}>
         <Text style={styles.titleLine1}>{item.titleLine1}</Text>
         <Text style={styles.titleLine2}>{item.titleLine2}</Text>
@@ -215,11 +213,6 @@ const styles = StyleSheet.create({
   mascotArea: {
     height: MASCOT_HEIGHT,
     backgroundColor: Tokens.colors.teal[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mascotEmoji: {
-    fontSize: 100,
   },
   introContent: {
     flex: 1,
