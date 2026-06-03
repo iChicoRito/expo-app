@@ -26,6 +26,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
 
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
@@ -93,6 +94,14 @@ export default function GameScreen() {
 
   const cardSlideStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: cardTranslateY.value }],
+  }));
+
+  const cardBlurStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      cardTranslateY.value,
+      [0, -SCREEN_HEIGHT / 2, -SCREEN_HEIGHT],
+      [0, 0.5, 1],
+    ),
   }));
 
   const goToResults = useCallback(
@@ -246,8 +255,8 @@ export default function GameScreen() {
 
         {/* Flip card */}
         <Animated.View style={cardSlideStyle}>
-        <Pressable onPress={handleFlip} disabled={flipped || isTransitioning}>
-          <View style={styles.cardSizer}>
+          <Pressable onPress={handleFlip} disabled={flipped || isTransitioning}>
+            <View style={styles.cardSizer}>
             {/* Front — unflipped */}
             <Animated.View style={[styles.cardFace, frontStyle]}>
               <View
@@ -286,6 +295,10 @@ export default function GameScreen() {
             </Animated.View>
           </View>
         </Pressable>
+        {/* Motion blur overlay */}
+        <Animated.View style={[styles.blurOverlay, cardBlurStyle]}>
+          <BlurView intensity={12} />
+        </Animated.View>
         </Animated.View>
 
         {/* Progress bar */}
@@ -448,6 +461,13 @@ const styles = StyleSheet.create({
   cardBack: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  blurOverlay: {
+    position: "absolute",
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 28,
+    overflow: "hidden",
   },
   deckPill: {
     flexDirection: "row",
