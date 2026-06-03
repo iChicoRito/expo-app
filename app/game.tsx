@@ -296,7 +296,7 @@ export default function GameScreen() {
           </View>
         </Pressable>
         {/* Motion blur overlay */}
-        <Animated.View style={[styles.blurOverlay, cardBlurStyle]}>
+        <Animated.View style={[styles.blurOverlay, cardBlurStyle]} pointerEvents="none">
           <BlurView intensity={12} />
         </Animated.View>
         </Animated.View>
