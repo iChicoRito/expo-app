@@ -178,6 +178,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 28,
     overflow: "hidden",
+    borderWidth: 2,
+    borderColor: Tokens.colors.white,
   },
   wave: {
     position: "absolute",
