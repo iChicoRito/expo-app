@@ -105,16 +105,18 @@ export default function OnboardingScreen() {
   const renderContent = () => {
     if (step.type === 'intro') {
       return (
-        <FadeContent key={step.key}>
-          <Text style={styles.titleLine1}>{step.titleLine1}</Text>
-          <Text style={styles.titleLine2}>{step.titleLine2}</Text>
-          <Text style={styles.introSubtitle}>{step.subtitle}</Text>
+        <>
+          <FadeContent key={step.key}>
+            <Text style={styles.titleLine1}>{step.titleLine1}</Text>
+            <Text style={styles.titleLine2}>{step.titleLine2}</Text>
+            <Text style={styles.introSubtitle}>{step.subtitle}</Text>
+          </FadeContent>
           <View style={styles.dotsRow}>
             {Array.from({ length: INTRO_COUNT }).map((_, i) => (
               <DotIndicator key={i} active={i === currentStep} />
             ))}
           </View>
-        </FadeContent>
+        </>
       );
     }
 
