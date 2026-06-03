@@ -58,7 +58,7 @@ export function DeckCard({
   scrollX,
   isActive,
 }: Props) {
-  const borderColor = mix(deck.bgColor, -0.3);
+  const borderColor = mix(deck.bgColor, 0.3);
   const darkBand = mix(deck.bgColor, -0.12);
   const waveLine = mix(deck.bgColor, 0.18);
   const waveHeight = height * 0.42;
