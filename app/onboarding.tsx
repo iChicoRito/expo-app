@@ -62,13 +62,12 @@ function DotIndicator({ active }: { active: boolean }) {
 
 // ─── Animated content wrapper ─────────────────────────────────────────────────
 
-function FadeContent({ stepKey, children }: { stepKey: string; children: React.ReactNode }) {
+function FadeContent({ children }: { children: React.ReactNode }) {
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = 0;
     opacity.value = withTiming(1, { duration: 300 });
-  }, [stepKey, opacity]);
+  }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
@@ -106,7 +105,7 @@ export default function OnboardingScreen() {
   const renderContent = () => {
     if (step.type === 'intro') {
       return (
-        <FadeContent stepKey={step.key}>
+        <FadeContent key={step.key}>
           <Text style={styles.titleLine1}>{step.titleLine1}</Text>
           <Text style={styles.titleLine2}>{step.titleLine2}</Text>
           <Text style={styles.introSubtitle}>{step.subtitle}</Text>
@@ -121,7 +120,7 @@ export default function OnboardingScreen() {
 
     if (step.type === 'name') {
       return (
-        <FadeContent stepKey={step.key}>
+        <FadeContent key={step.key}>
           <Text style={styles.nameTitle}>What should we call you?</Text>
           <Text style={styles.nameSubtitle}>Your name personalizes your Spillr</Text>
           <TextInput
@@ -140,7 +139,7 @@ export default function OnboardingScreen() {
 
     if (step.type === 'welcome') {
       return (
-        <FadeContent stepKey={step.key}>
+        <FadeContent key={step.key}>
           <Text style={styles.welcomeTitle}>
             {"Let's Start\nSpilling, "}
             <Text style={styles.welcomeName}>{name.trim() || 'Friend'}</Text>
