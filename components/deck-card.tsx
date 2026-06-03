@@ -105,7 +105,16 @@ export function DeckCard({
       [0.45, 1, 0.45],
       Extrapolation.CLAMP,
     );
-    return { transform: [{ scale }], opacity };
+    const rotate = interpolate(
+      scrollX.value,
+      inputRange,
+      [-8, 0, 8],
+      Extrapolation.CLAMP,
+    );
+    return {
+      transform: [{ scale }, { rotateZ: `${rotate}deg` }],
+      opacity,
+    };
   });
 
   return (
