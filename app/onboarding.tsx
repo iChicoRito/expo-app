@@ -172,6 +172,7 @@ export default function OnboardingScreen() {
               returnKeyType="done"
               autoCorrect={false}
               autoCapitalize="words"
+              textAlign="left"
             />
           </View>
         </FadeContent>
