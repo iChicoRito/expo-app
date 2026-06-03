@@ -22,6 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BottomNav } from "@/components/bottom-nav";
 import { DeckCard, type DeckData } from "@/components/deck-card";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
@@ -102,7 +103,7 @@ export default function PlayScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       {/* ── Header ── */}
       <View style={styles.header}>
         <SpillrLogo width={70} height={33} />
@@ -170,6 +171,9 @@ export default function PlayScreen() {
           )}
         />
       </View>
+
+      {/* ── Bottom navigation ── */}
+      <BottomNav active="play" />
     </SafeAreaView>
   );
 }
