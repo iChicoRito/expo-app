@@ -360,13 +360,16 @@ const styles = StyleSheet.create({
 
   // ── Header ──
   header: {
+    position: "relative",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: Tokens.spacing[5],
     paddingTop: Tokens.spacing[2],
   },
   backButton: {
+    position: "absolute",
+    left: Tokens.spacing[5],
     flexDirection: "row",
     alignItems: "center",
     gap: Tokens.spacing[1],
