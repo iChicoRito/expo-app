@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
@@ -107,6 +108,7 @@ function FadeContent({ children }: { children: React.ReactNode }) {
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [name, setName] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -129,8 +131,11 @@ export default function OnboardingScreen() {
       setCurrentStep(currentStep + 1);
     } else {
       setSnackbarVisible(true);
+      setTimeout(() => {
+        router.replace({ pathname: "/play", params: { name: name.trim() } });
+      }, 1200);
     }
-  }, [currentStep, step, name]);
+  }, [currentStep, step, name, router]);
 
   const renderContent = () => {
     if (step.type === "intro") {
