@@ -24,6 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BottomNav } from "@/components/bottom-nav";
 import { DeckCard, type DeckData } from "@/components/deck-card";
+import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
 import { Tokens } from "@/constants/tokens";
@@ -170,6 +171,13 @@ export default function PlayScreen() {
             />
           )}
         />
+
+        {/* Page dots */}
+        <View style={styles.dotsRow}>
+          {DECKS.map((deck, i) => (
+            <DotIndicator key={deck.id} active={i === activeIndex} />
+          ))}
+        </View>
       </View>
 
       {/* ── Bottom navigation ── */}
@@ -268,5 +276,11 @@ const styles = StyleSheet.create({
   },
   carouselContent: {
     alignItems: "center",
+  },
+  dotsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: Tokens.spacing[2],
+    marginTop: Tokens.spacing[6],
   },
 });

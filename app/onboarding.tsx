@@ -11,14 +11,13 @@ import {
   View,
 } from "react-native";
 import Animated, {
-  interpolate,
-  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { DotIndicator } from "@/components/dot-indicator";
 import { Snackbar } from "@/components/snackbar";
 import { Tokens } from "@/constants/tokens";
 
@@ -69,27 +68,6 @@ const STEPS: Step[] = [
   { key: "name", type: "name" },
   { key: "welcome", type: "welcome" },
 ];
-
-// ─── Dot indicator ────────────────────────────────────────────────────────────
-
-function DotIndicator({ active }: { active: boolean }) {
-  const progress = useSharedValue(active ? 1 : 0);
-
-  useEffect(() => {
-    progress.value = withTiming(active ? 1 : 0, { duration: 300 });
-  }, [active, progress]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    width: interpolate(progress.value, [0, 1], [8, 24]),
-    backgroundColor: interpolateColor(
-      progress.value,
-      [0, 1],
-      [Tokens.colors.zinc[300], Tokens.colors.teal[500]],
-    ),
-  }));
-
-  return <Animated.View style={[styles.dot, animatedStyle]} />;
-}
 
 // ─── Animated content wrapper ─────────────────────────────────────────────────
 
@@ -330,10 +308,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: Tokens.spacing[2],
     marginTop: Tokens.spacing[5],
-  },
-  dot: {
-    height: 8,
-    borderRadius: Tokens.layout.borderRadius.full,
   },
 
   // ── Name content ──
