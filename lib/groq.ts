@@ -5,9 +5,8 @@
  * server/proxy and rotated before any production release. Isolated here so
  * that move is a one-file change.
  */
-const GROQ_API_KEY =
-  "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";
-const GROQ_MODEL = "qwen/qwen3-32b";
+const GROQ_API_KEY = "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";
+const GROQ_MODEL = "llama-3.1-8b-instant";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const MAX_WORDS = 12;
@@ -67,7 +66,11 @@ export async function generateQuestion(deckName: string): Promise<string> {
 
   if (!res.ok) {
     let body = "";
-    try { body = await res.text(); } catch { /* ignore */ }
+    try {
+      body = await res.text();
+    } catch {
+      /* ignore */
+    }
     console.error(`[Groq] HTTP ${res.status}:`, body);
     throw new GroqError(`Groq request failed (${res.status}).`);
   }
@@ -77,7 +80,10 @@ export async function generateQuestion(deckName: string): Promise<string> {
     const raw: string | undefined = json?.choices?.[0]?.message?.content;
 
     if (!raw || !raw.trim()) {
-      console.error("[Groq] Empty or missing text in response:", JSON.stringify(json));
+      console.error(
+        "[Groq] Empty or missing text in response:",
+        JSON.stringify(json),
+      );
       throw new GroqError("Empty response from Groq.");
     }
 

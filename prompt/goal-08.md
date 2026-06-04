@@ -112,4 +112,4 @@ A reusable Drawer/Sheet component and a reusable Modal/Dialog component must be 
 
 #### 4.6 Gemini API Configuration
 
-The Gemini API key to be used is: `AIzaSyAb8RN6Jk6u61pT8dedM0SDlqDJotxdtwjVGjf4KLYPrPn9l3Dg`. This key must be configured in the AI integration layer for all Gemini API requests.
+The Gemini API key to be used is: `AQ.Ab8RN6Jk6u61pT8dedM0SDlqDJotxdtwjVGjf4KLYPrPn9l3Dg`. This key must be configured in the AI integration layer for all Gemini API requests.
