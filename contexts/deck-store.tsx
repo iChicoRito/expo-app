@@ -246,7 +246,7 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
         }
         return { ok: true, text };
       } catch (err) {
-        if (err instanceof GeminiError) return { ok: false, reason: "error" };
+        console.error("[DeckStore.generate]", err);
         return { ok: false, reason: "error" };
       }
     },
