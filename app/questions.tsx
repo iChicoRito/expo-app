@@ -352,11 +352,6 @@ const styles = StyleSheet.create({
     paddingVertical: Tokens.spacing[3],
     paddingHorizontal: Tokens.spacing[5],
     borderRadius: Tokens.layout.borderRadius["2xl"],
-    shadowColor: Tokens.colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
   },
   fabText: {
     color: Tokens.colors.white,
