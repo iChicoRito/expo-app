@@ -4,12 +4,6 @@ import { SvgXml } from "react-native-svg";
 
 import type { DeckColorScale } from "@/constants/decks";
 
-const SCALE = 0.85;
-const DEFAULT_W = 82 * SCALE;
-const DEFAULT_H = 77 * SCALE;
-const PRESSED_W = 93 * SCALE;
-const PRESSED_H = 83 * SCALE;
-
 const DEFAULT_SVG = `<svg width="82" height="77" viewBox="0 0 82 77" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="82" height="76.875" rx="15.375" fill="#0D9488"/>
 <g filter="url(#filter0_d_697_4642)">
@@ -128,10 +122,10 @@ export function SpilledButton({ colorScale, onPress }: Props) {
       <View style={styles.container}>
         {pressed ? (
           <View style={styles.pressedOffset}>
-            <SvgXml xml={xml} width={PRESSED_W} height={PRESSED_H} />
+            <SvgXml xml={xml} />
           </View>
         ) : (
-          <SvgXml xml={xml} width={DEFAULT_W} height={DEFAULT_H} />
+          <SvgXml xml={xml} />
         )}
       </View>
     </Pressable>
@@ -139,6 +133,6 @@ export function SpilledButton({ colorScale, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { width: DEFAULT_W, height: DEFAULT_H },
-  pressedOffset: { position: "absolute", top: -12.9375 * SCALE, left: -2.5625 * SCALE },
+  container: { width: 82, height: 77 },
+  pressedOffset: { position: "absolute", top: -12.9375, left: -2.5625 },
 });

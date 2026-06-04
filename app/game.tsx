@@ -118,7 +118,14 @@ export default function GameScreen() {
       sidesTY.value = 36;
       sidesOpacity.value = 0;
     }
-  }, [flipped, cardGroupOffset, spilledTY, spilledOpacity, sidesTY, sidesOpacity]);
+  }, [
+    flipped,
+    cardGroupOffset,
+    spilledTY,
+    spilledOpacity,
+    sidesTY,
+    sidesOpacity,
+  ]);
 
   const cardGroupStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: cardGroupOffset.value }],
@@ -310,66 +317,71 @@ export default function GameScreen() {
       {/* ── Center group: card + progress hug each other ── */}
       <View style={styles.centerGroup}>
         <Animated.View style={[styles.cardGroup, cardGroupStyle]}>
-        {/* Flip card */}
-        <Animated.View style={cardSlideStyle}>
-          <Pressable onPress={handleFlip} disabled={flipped || isTransitioning}>
-            <View style={styles.cardSizer}>
-              {/* Front — unflipped */}
-              <Animated.View style={[styles.cardFace, frontStyle]}>
-                <View
-                  style={[styles.deckPill, { backgroundColor: deck.bgLight }]}
+          {/* Flip card */}
+          <Animated.View style={cardSlideStyle}>
+            <Pressable
+              onPress={handleFlip}
+              disabled={flipped || isTransitioning}
+            >
+              <View style={styles.cardSizer}>
+                {/* Front — unflipped */}
+                <Animated.View style={[styles.cardFace, frontStyle]}>
+                  <View
+                    style={[styles.deckPill, { backgroundColor: deck.bgLight }]}
+                  >
+                    <HugeiconsIcon icon={deck.icon} size={14} color={accent} />
+                    <Text style={[styles.deckPillText, { color: accent }]}>
+                      {deck.title}
+                    </Text>
+                  </View>
+                  <View style={styles.cardCenter}>
+                    <Text style={styles.questionLabel}>Question</Text>
+                    <Text style={styles.questionNumber}>
+                      No. {currentIndex + 1}
+                    </Text>
+                  </View>
+                  <View style={styles.flipHint}>
+                    <Text style={[styles.flipHintText, { color: accent }]}>
+                      Tap to flip
+                    </Text>
+                    <HugeiconsIcon
+                      icon={ArrowReloadHorizontalIcon}
+                      size={16}
+                      color={accent}
+                    />
+                  </View>
+                </Animated.View>
+
+                {/* Back — question revealed */}
+                <Animated.View
+                  style={[styles.cardFace, styles.cardBack, backStyle]}
                 >
-                  <HugeiconsIcon icon={deck.icon} size={14} color={accent} />
-                  <Text style={[styles.deckPillText, { color: accent }]}>
-                    {deck.title}
+                  <Text style={styles.questionText}>
+                    {questions[currentIndex]}
                   </Text>
-                </View>
-                <View style={styles.cardCenter}>
-                  <Text style={styles.questionLabel}>Question</Text>
-                  <Text style={styles.questionNumber}>
-                    No. {currentIndex + 1}
-                  </Text>
-                </View>
-                <View style={styles.flipHint}>
-                  <Text style={[styles.flipHintText, { color: accent }]}>
-                    Tap to flip
-                  </Text>
-                  <HugeiconsIcon
-                    icon={ArrowReloadHorizontalIcon}
-                    size={16}
-                    color={accent}
-                  />
-                </View>
-              </Animated.View>
-
-              {/* Back — question revealed */}
-              <Animated.View
-                style={[styles.cardFace, styles.cardBack, backStyle]}
-              >
-                <Text style={styles.questionText}>
-                  {questions[currentIndex]}
-                </Text>
-              </Animated.View>
-            </View>
-          </Pressable>
-          {/* Motion blur overlay */}
-          <Animated.View
-            style={[styles.blurOverlay, cardBlurStyle]}
-            pointerEvents="none"
-          >
-            <BlurView intensity={30} />
+                </Animated.View>
+              </View>
+            </Pressable>
+            {/* Motion blur overlay */}
+            <Animated.View
+              style={[styles.blurOverlay, cardBlurStyle]}
+              pointerEvents="none"
+            >
+              <BlurView intensity={30} />
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
 
-        {/* Progress bar */}
-        <View style={styles.progressWrapper}>
-          <View style={styles.progressBarContainer}>
-            <Animated.View style={[styles.progressBarFill, progressBarStyle]} />
+          {/* Progress bar */}
+          <View style={styles.progressWrapper}>
+            <View style={styles.progressBarContainer}>
+              <Animated.View
+                style={[styles.progressBarFill, progressBarStyle]}
+              />
+            </View>
+            <Text style={styles.progressLabel}>
+              {currentIndex + 1} of {total}
+            </Text>
           </View>
-          <Text style={styles.progressLabel}>
-            {currentIndex + 1} of {total}
-          </Text>
-        </View>
         </Animated.View>
       </View>
 
