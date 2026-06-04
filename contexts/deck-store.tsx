@@ -27,7 +27,7 @@ import {
   USER_QUESTIONS_KEY,
 } from "@/constants/storage";
 import { Tokens } from "@/constants/tokens";
-import { generateQuestion as geminiGenerate, GeminiError } from "@/lib/gemini";
+import { generateQuestion as groqGenerate, GroqError } from "@/lib/groq";
 import { isOnline } from "@/lib/network";
 import {
   consume,
@@ -237,7 +237,7 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
       if (!(await isOnline())) return { ok: false, reason: "offline" };
       if (getInfo(aiRate).blocked) return { ok: false, reason: "rate-limited" };
       try {
-        const text = await geminiGenerate(deckName);
+        const text = await groqGenerate(deckName);
         const nextRate = consume(aiRate);
         if (nextRate) {
           setAiRate(nextRate);
