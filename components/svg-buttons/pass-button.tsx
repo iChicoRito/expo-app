@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
 import type { DeckColorScale } from "@/constants/decks";
@@ -119,7 +119,20 @@ export function PassButton({ colorScale, onPress }: Props) {
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
-      <SvgXml xml={xml} />
+      <View style={styles.container}>
+        {pressed ? (
+          <View style={styles.pressedOffset}>
+            <SvgXml xml={xml} />
+          </View>
+        ) : (
+          <SvgXml xml={xml} />
+        )}
+      </View>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { width: 102, height: 60 },
+  pressedOffset: { position: "absolute", top: -10, left: -2 },
+});
