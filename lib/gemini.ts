@@ -8,7 +8,7 @@
  * change.
  */
 const GEMINI_API_KEY = "AQ.Ab8RN6IWD-87N-EkuziGGx8Es916Q63kvCHq26INNG68Tgvvkg";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 const MAX_WORDS = 12;
