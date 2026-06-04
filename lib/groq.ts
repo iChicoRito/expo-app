@@ -74,10 +74,18 @@ export async function generateQuestion(deckName: string): Promise<string> {
 
   try {
     const json = await res.json();
-    const text: string | undefined = json?.choices?.[0]?.message?.content;
+    const raw: string | undefined = json?.choices?.[0]?.message?.content;
 
-    if (!text || !text.trim()) {
+    if (!raw || !raw.trim()) {
       console.error("[Groq] Empty or missing text in response:", JSON.stringify(json));
+      throw new GroqError("Empty response from Groq.");
+    }
+
+    // qwen3 reasoning models prefix the answer with a <think>…</think> block
+    const text = raw.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+
+    if (!text) {
+      console.error("[Groq] No content after stripping <think> block:", raw);
       throw new GroqError("Empty response from Groq.");
     }
 
