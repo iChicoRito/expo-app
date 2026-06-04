@@ -1,11 +1,14 @@
 import {
   ArrowLeft01Icon,
   ArrowReloadHorizontalIcon,
+  ArrowRight01Icon,
+  Cancel01Icon,
   Clock01Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react-native";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
   Pressable,
@@ -25,11 +28,6 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
-import { SvgXml } from "react-native-svg";
-
-import END_ROUND_BTN_XML from "@/components/svg-assets/end-round-btn-xml";
-import PASS_BTN_XML from "@/components/svg-assets/pass-btn-xml";
-import SPILLED_BTN_XML from "@/components/svg-assets/spilled-btn-xml";
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { getDeckById } from "@/constants/decks";
@@ -319,25 +317,22 @@ export default function GameScreen() {
         {flipped && (
           <View style={styles.actionsRow} pointerEvents={isTransitioning ? "none" : "auto"}>
             <ActionButton
-              svgXml={END_ROUND_BTN_XML}
-              label="End"
+              icon={Cancel01Icon}
+              label="End Round"
               accent={accent}
               onPress={handleEnd}
-              size={88}
             />
             <ActionButton
-              svgXml={SPILLED_BTN_XML}
+              icon={Tick02Icon}
               label="Spilled"
               accent={accent}
               onPress={handleAnswered}
-              size={120}
             />
             <ActionButton
-              svgXml={PASS_BTN_XML}
+              icon={ArrowRight01Icon}
               label="Pass"
               accent={accent}
               onPress={handlePass}
-              size={88}
             />
           </View>
         )}
@@ -346,47 +341,26 @@ export default function GameScreen() {
   );
 }
 
-function lightenHex(hex: string, factor: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (
-    "#" +
-    [r, g, b]
-      .map((c) => Math.round(c + (255 - c) * factor).toString(16).padStart(2, "0"))
-      .join("")
-  );
-}
-
-function colorizeSvg(xml: string, accent: string): string {
-  const light = lightenHex(accent, 0.65);
-  return xml
-    .replace(/fill="#D58900"/g, `fill="${accent}"`)
-    .replace(/fill="#F[CDE]E[0-9A-Fa-f]{3}"/g, `fill="${light}"`);
-}
-
 function ActionButton({
-  svgXml,
+  icon,
   label,
   accent,
   onPress,
-  size,
 }: {
-  svgXml: string;
+  icon: IconSvgElement;
   label: string;
   accent: string;
   onPress: () => void;
-  size: number;
 }) {
-  const colored = useMemo(() => colorizeSvg(svgXml, accent), [svgXml, accent]);
-  const svgHeight = Math.round(size * (235 / 239));
   return (
     <TouchableOpacity
       style={styles.action}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <SvgXml xml={colored} width={size} height={svgHeight} />
+      <View style={styles.actionCircle}>
+        <HugeiconsIcon icon={icon} size={24} color={accent} />
+      </View>
       <Text style={styles.actionLabel}>{label}</Text>
     </TouchableOpacity>
   );
@@ -538,19 +512,26 @@ const styles = StyleSheet.create({
 
   // ── Actions ──
   actionsSlot: {
-    height: 160,
+    height: 96,
     justifyContent: "center",
     paddingBottom: Tokens.spacing[4],
   },
   actionsRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
-    gap: 24,
+    gap: Tokens.spacing[10],
   },
   action: {
     alignItems: "center",
     gap: Tokens.spacing[2],
+  },
+  actionCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Tokens.colors.white,
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionLabel: {
     color: Tokens.colors.white,
