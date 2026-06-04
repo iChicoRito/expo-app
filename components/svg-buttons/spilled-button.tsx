@@ -4,7 +4,7 @@ import { SvgXml } from "react-native-svg";
 
 import type { DeckColorScale } from "@/constants/decks";
 
-const SCALE = 0.75;
+const SCALE = 0.85;
 const DEFAULT_W = 82 * SCALE;
 const DEFAULT_H = 77 * SCALE;
 const PRESSED_W = 93 * SCALE;
