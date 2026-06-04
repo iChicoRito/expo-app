@@ -7,7 +7,7 @@
  * before any production release. It is isolated here so that move is a one-file
  * change.
  */
-const GEMINI_API_KEY = "AQ.Ab8RN6Jk6u61pT8dedM0SDlqDJotxdtwjVGjf4KLYPrPn9l3Dg";
+const GEMINI_API_KEY = "AQ.Ab8RN6IWD-87N-EkuziGGx8Es916Q63kvCHq26INNG68Tgvvkg";
 const GEMINI_MODEL = "gemini-2.0-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
