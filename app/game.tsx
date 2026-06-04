@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    gap: Tokens.spacing[10],
+    gap: Tokens.spacing[6],
   },
   // ── Empty state ──
   emptyState: {
