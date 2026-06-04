@@ -7,7 +7,7 @@
  * before any production release. It is isolated here so that move is a one-file
  * change.
  */
-const GEMINI_API_KEY = "AIzaSyAb8RN6Jk6u61pT8dedM0SDlqDJotxdtwjVGjf4KLYPrPn9l3Dg";
+const GEMINI_API_KEY = "AQ.Ab8RN6Jk6u61pT8dedM0SDlqDJotxdtwjVGjf4KLYPrPn9l3Dg";
 const GEMINI_MODEL = "gemini-2.0-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -27,7 +27,10 @@ function buildPrompt(deckName: string): string {
 
 /** Trim to at most `MAX_WORDS` words and strip wrapping quotes/whitespace. */
 function sanitize(text: string): string {
-  let t = text.trim().replace(/^["'""]+|["'""]+$/g, "").trim();
+  let t = text
+    .trim()
+    .replace(/^["'""]+|["'""]+$/g, "")
+    .trim();
   const words = t.split(/\s+/);
   if (words.length > MAX_WORDS) {
     t = words.slice(0, MAX_WORDS).join(" ");
@@ -53,21 +56,32 @@ export async function generateQuestion(deckName: string): Promise<string> {
         generationConfig: { temperature: 1.0, maxOutputTokens: 60 },
       }),
     });
-  } catch {
+  } catch (e) {
+    console.error("[Gemini] Network error:", e);
     throw new GeminiError("Network request failed.");
   }
 
   if (!res.ok) {
+    let body = "";
+    try { body = await res.text(); } catch { /* ignore */ }
+    console.error(`[Gemini] HTTP ${res.status}:`, body);
     throw new GeminiError(`Gemini request failed (${res.status}).`);
   }
 
-  const json = await res.json();
-  const text: string | undefined =
-    json?.candidates?.[0]?.content?.parts?.[0]?.text;
+  try {
+    const json = await res.json();
+    const text: string | undefined =
+      json?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-  if (!text || !text.trim()) {
-    throw new GeminiError("Empty response from Gemini.");
+    if (!text || !text.trim()) {
+      console.error("[Gemini] Empty or missing text in response:", JSON.stringify(json));
+      throw new GeminiError("Empty response from Gemini.");
+    }
+
+    return sanitize(text);
+  } catch (e) {
+    if (e instanceof GeminiError) throw e;
+    console.error("[Gemini] Response parse error:", e);
+    throw new GeminiError("Failed to parse Gemini response.");
   }
-
-  return sanitize(text);
 }
