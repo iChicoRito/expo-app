@@ -19,7 +19,7 @@ import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
-import { DECKS } from "@/constants/decks";
+import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -35,6 +35,7 @@ const CAROUSEL_HEIGHT = CARD_HEIGHT * 1.14;
 
 export default function PlayScreen() {
   const router = useRouter();
+  const { decks } = useDeckStore();
   const { name } = useLocalSearchParams<{ name?: string }>();
   const displayName = name?.trim() || "Friend";
   const [activeIndex, setActiveIndex] = useState(0);
@@ -51,9 +52,9 @@ export default function PlayScreen() {
   const handleMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const idx = Math.round(e.nativeEvent.contentOffset.x / ITEM_SIZE);
-      setActiveIndex(Math.max(0, Math.min(idx, DECKS.length - 1)));
+      setActiveIndex(Math.max(0, Math.min(idx, decks.length - 1)));
     },
-    [],
+    [decks.length],
   );
 
   return (
@@ -92,7 +93,7 @@ export default function PlayScreen() {
       {/* ── Carousel ── */}
       <View style={styles.carouselWrapper}>
         <Animated.FlatList
-          data={DECKS}
+          data={decks}
           keyExtractor={(item) => item.id}
           horizontal
           style={styles.carousel}
@@ -133,14 +134,19 @@ export default function PlayScreen() {
 
         {/* Page dots */}
         <View style={styles.dotsRow}>
-          {DECKS.map((deck, i) => (
+          {decks.map((deck, i) => (
             <DotIndicator key={deck.id} active={i === activeIndex} />
           ))}
         </View>
       </View>
 
       {/* ── Bottom navigation ── */}
-      <BottomNav active="play" />
+      <BottomNav
+        active="play"
+        onSelect={(tab) => {
+          if (tab === "deck") router.push("/decks");
+        }}
+      />
     </SafeAreaView>
   );
 }

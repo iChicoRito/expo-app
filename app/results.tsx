@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
-import { getDeckById } from "@/constants/decks";
+import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -44,6 +44,7 @@ function resolveScenario(answered: number, passed: number, name: string) {
 
 export default function ResultsScreen() {
   const router = useRouter();
+  const { getDeckById } = useDeckStore();
   const { deckId, name, answered, passed } = useLocalSearchParams<{
     deckId?: string;
     name?: string;

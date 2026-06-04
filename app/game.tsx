@@ -31,8 +31,8 @@ import { SpillrLogo } from "@/components/spillr-logo";
 import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
 import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
-import { getDeckById, getDeckColorScale } from "@/constants/decks";
-import { getQuestionsForDeck } from "@/constants/questions";
+import { getDeckColorScale } from "@/constants/decks";
+import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -48,6 +48,7 @@ function formatTime(seconds: number): string {
 
 export default function GameScreen() {
   const router = useRouter();
+  const { getDeckById, getQuestions } = useDeckStore();
   const { deckId, name } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
@@ -62,7 +63,7 @@ export default function GameScreen() {
         c500: Tokens.colors.teal[500],
         c600: Tokens.colors.teal[600],
       };
-  const questions = getQuestionsForDeck(deckId);
+  const questions = getQuestions(deckId);
   const total = questions.length;
 
   const [currentIndex, setCurrentIndex] = useState(0);

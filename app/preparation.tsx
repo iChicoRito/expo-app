@@ -8,11 +8,12 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect } from "react";
 
-import { getDeckById } from "@/constants/decks";
+import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
 
 export default function PreparationScreen() {
   const router = useRouter();
+  const { getDeckById } = useDeckStore();
   const { deckId, name } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
