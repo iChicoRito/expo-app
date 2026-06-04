@@ -4,6 +4,12 @@ import { SvgXml } from "react-native-svg";
 
 import type { DeckColorScale } from "@/constants/decks";
 
+const SCALE = 0.75;
+const DEFAULT_W = 87 * SCALE;
+const DEFAULT_H = 60 * SCALE;
+const PRESSED_W = 95 * SCALE;
+const PRESSED_H = 64 * SCALE;
+
 const DEFAULT_SVG = `<svg width="87" height="60" viewBox="0 0 87 60" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="87" height="60" rx="12" fill="#0D9488"/>
 <g filter="url(#filter0_d_697_4641)">
@@ -122,10 +128,10 @@ export function EndRoundButton({ colorScale, onPress }: Props) {
       <View style={styles.container}>
         {pressed ? (
           <View style={styles.pressedOffset}>
-            <SvgXml xml={xml} />
+            <SvgXml xml={xml} width={PRESSED_W} height={PRESSED_H} />
           </View>
         ) : (
-          <SvgXml xml={xml} />
+          <SvgXml xml={xml} width={DEFAULT_W} height={DEFAULT_H} />
         )}
       </View>
     </Pressable>
@@ -133,6 +139,6 @@ export function EndRoundButton({ colorScale, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { width: 87, height: 60 },
-  pressedOffset: { position: "absolute", top: -10, left: -2 },
+  container: { width: DEFAULT_W, height: DEFAULT_H },
+  pressedOffset: { position: "absolute", top: -10 * SCALE, left: -2 * SCALE },
 });
