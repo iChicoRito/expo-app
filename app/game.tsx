@@ -4,6 +4,7 @@ import {
   Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -24,20 +25,19 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
 
+import { DiamondGrid } from "@/components/diamond-grid";
+import { SpillrLogo } from "@/components/spillr-logo";
 import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
 import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
-import { DiamondGrid } from "@/components/diamond-grid";
-import { SpillrLogo } from "@/components/spillr-logo";
 import { getDeckById, getDeckColorScale } from "@/constants/decks";
 import { getQuestionsForDeck } from "@/constants/questions";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.82;
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.5;
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
 const TIMER_SECONDS = 120; // fixed 2-minute round
 
 function formatTime(seconds: number): string {
@@ -56,7 +56,12 @@ export default function GameScreen() {
   const accent = deck?.bgColor ?? Tokens.colors.teal[500];
   const colorScale = deck
     ? getDeckColorScale(deck)
-    : { c300: Tokens.colors.teal[300], c400: Tokens.colors.teal[400], c500: Tokens.colors.teal[500], c600: Tokens.colors.teal[600] };
+    : {
+        c300: Tokens.colors.teal[300],
+        c400: Tokens.colors.teal[400],
+        c500: Tokens.colors.teal[500],
+        c600: Tokens.colors.teal[600],
+      };
   const questions = getQuestionsForDeck(deckId);
   const total = questions.length;
 
@@ -79,6 +84,9 @@ export default function GameScreen() {
     progressValue.value = withTiming(currentIndex + 1, { duration: 300 });
   }, [currentIndex, progressValue]);
 
+  // Card group slides up when flipped to make room for the action buttons.
+  const cardGroupOffset = useSharedValue(0);
+
   // Button entrance: Spilled rises first, End Round + Pass follow 130ms later.
   const spilledTY = useSharedValue(36);
   const spilledOpacity = useSharedValue(0);
@@ -86,18 +94,35 @@ export default function GameScreen() {
   const sidesOpacity = useSharedValue(0);
   useEffect(() => {
     if (flipped) {
-      spilledTY.value = withTiming(0, { duration: 340, easing: Easing.out(Easing.cubic) });
+      cardGroupOffset.value = withTiming(-50, {
+        duration: 340,
+        easing: Easing.out(Easing.cubic),
+      });
+      spilledTY.value = withTiming(0, {
+        duration: 340,
+        easing: Easing.out(Easing.cubic),
+      });
       spilledOpacity.value = withTiming(1, { duration: 280 });
-      sidesTY.value = withDelay(130, withTiming(0, { duration: 340, easing: Easing.out(Easing.cubic) }));
+      sidesTY.value = withDelay(
+        130,
+        withTiming(0, { duration: 340, easing: Easing.out(Easing.cubic) }),
+      );
       sidesOpacity.value = withDelay(130, withTiming(1, { duration: 280 }));
     } else {
+      cardGroupOffset.value = withTiming(0, {
+        duration: 340,
+        easing: Easing.out(Easing.cubic),
+      });
       spilledTY.value = 36;
       spilledOpacity.value = 0;
       sidesTY.value = 36;
       sidesOpacity.value = 0;
     }
-  }, [flipped, spilledTY, spilledOpacity, sidesTY, sidesOpacity]);
+  }, [flipped, cardGroupOffset, spilledTY, spilledOpacity, sidesTY, sidesOpacity]);
 
+  const cardGroupStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: cardGroupOffset.value }],
+  }));
   const spilledAnimStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: spilledTY.value }],
     opacity: spilledOpacity.value,
@@ -110,13 +135,13 @@ export default function GameScreen() {
   const frontStyle = useAnimatedStyle(() => ({
     transform: [
       { perspective: 1000 },
-      { rotateY: `${interpolate(flip.value, [0, 1], [0, 180])}deg` },
+      { rotateY: `${interpolate(flip.value, [0, 1, 2], [0, 180, 360])}deg` },
     ],
   }));
   const backStyle = useAnimatedStyle(() => ({
     transform: [
       { perspective: 1000 },
-      { rotateY: `${interpolate(flip.value, [0, 1], [180, 360])}deg` },
+      { rotateY: `${interpolate(flip.value, [0, 1, 2], [180, 360, 540])}deg` },
     ],
   }));
 
@@ -163,7 +188,10 @@ export default function GameScreen() {
       setIsTransitioning(true);
 
       // Exit: slide up + continue flip simultaneously so the card spins as it leaves.
-      flip.value = withTiming(2, { duration: 350, easing: Easing.in(Easing.cubic) });
+      flip.value = withTiming(2, {
+        duration: 350,
+        easing: Easing.in(Easing.cubic),
+      });
       cardTranslateY.value = withTiming(
         -SCREEN_HEIGHT,
         { duration: 350, easing: Easing.in(Easing.cubic) },
@@ -269,68 +297,68 @@ export default function GameScreen() {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
         <SpillrLogo width={52} height={25} color={Tokens.colors.white} />
+        {flipped && (
+          <View style={styles.timerPill}>
+            <HugeiconsIcon icon={Clock01Icon} size={16} color={accent} />
+            <Text style={[styles.timerText, { color: accent }]}>
+              {formatTime(secondsLeft)}
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* ── Center group: timer + card + progress hug each other ── */}
+      {/* ── Center group: card + progress hug each other ── */}
       <View style={styles.centerGroup}>
-        {/* Timer (visible once flipped) */}
-        <View style={styles.timerSlot}>
-          {flipped && (
-            <View style={styles.timerPill}>
-              <HugeiconsIcon icon={Clock01Icon} size={16} color={accent} />
-              <Text style={[styles.timerText, { color: accent }]}>
-                {formatTime(secondsLeft)}
-              </Text>
-            </View>
-          )}
-        </View>
-
+        <Animated.View style={[styles.cardGroup, cardGroupStyle]}>
         {/* Flip card */}
         <Animated.View style={cardSlideStyle}>
           <Pressable onPress={handleFlip} disabled={flipped || isTransitioning}>
             <View style={styles.cardSizer}>
-            {/* Front — unflipped */}
-            <Animated.View style={[styles.cardFace, frontStyle]}>
-              <View
-                style={[styles.deckPill, { backgroundColor: deck.bgLight }]}
-              >
-                <HugeiconsIcon icon={deck.icon} size={14} color={accent} />
-                <Text style={[styles.deckPillText, { color: accent }]}>
-                  {deck.title}
-                </Text>
-              </View>
-              <View style={styles.cardCenter}>
-                <Text style={styles.questionLabel}>Question</Text>
-                <Text style={styles.questionNumber}>
-                  No. {currentIndex + 1}
-                </Text>
-              </View>
-              <View style={styles.flipHint}>
-                <Text style={[styles.flipHintText, { color: accent }]}>
-                  Tap to flip
-                </Text>
-                <HugeiconsIcon
-                  icon={ArrowReloadHorizontalIcon}
-                  size={16}
-                  color={accent}
-                />
-              </View>
-            </Animated.View>
+              {/* Front — unflipped */}
+              <Animated.View style={[styles.cardFace, frontStyle]}>
+                <View
+                  style={[styles.deckPill, { backgroundColor: deck.bgLight }]}
+                >
+                  <HugeiconsIcon icon={deck.icon} size={14} color={accent} />
+                  <Text style={[styles.deckPillText, { color: accent }]}>
+                    {deck.title}
+                  </Text>
+                </View>
+                <View style={styles.cardCenter}>
+                  <Text style={styles.questionLabel}>Question</Text>
+                  <Text style={styles.questionNumber}>
+                    No. {currentIndex + 1}
+                  </Text>
+                </View>
+                <View style={styles.flipHint}>
+                  <Text style={[styles.flipHintText, { color: accent }]}>
+                    Tap to flip
+                  </Text>
+                  <HugeiconsIcon
+                    icon={ArrowReloadHorizontalIcon}
+                    size={16}
+                    color={accent}
+                  />
+                </View>
+              </Animated.View>
 
-            {/* Back — question revealed */}
-            <Animated.View
-              style={[styles.cardFace, styles.cardBack, backStyle]}
-            >
-              <Text style={styles.questionText}>
-                {questions[currentIndex]}
-              </Text>
-            </Animated.View>
-          </View>
-        </Pressable>
-        {/* Motion blur overlay */}
-        <Animated.View style={[styles.blurOverlay, cardBlurStyle]} pointerEvents="none">
-          <BlurView intensity={30} />
-        </Animated.View>
+              {/* Back — question revealed */}
+              <Animated.View
+                style={[styles.cardFace, styles.cardBack, backStyle]}
+              >
+                <Text style={styles.questionText}>
+                  {questions[currentIndex]}
+                </Text>
+              </Animated.View>
+            </View>
+          </Pressable>
+          {/* Motion blur overlay */}
+          <Animated.View
+            style={[styles.blurOverlay, cardBlurStyle]}
+            pointerEvents="none"
+          >
+            <BlurView intensity={30} />
+          </Animated.View>
         </Animated.View>
 
         {/* Progress bar */}
@@ -342,26 +370,41 @@ export default function GameScreen() {
             {currentIndex + 1} of {total}
           </Text>
         </View>
+        </Animated.View>
       </View>
 
       {/* ── Actions (visible once flipped) ── */}
       <View style={styles.actionsSlot}>
-        <View style={styles.actionsRow} pointerEvents={isTransitioning || !flipped ? "none" : "auto"}>
+        <View
+          style={styles.actionsRow}
+          pointerEvents={isTransitioning || !flipped ? "none" : "auto"}
+        >
           <Animated.View style={sidesAnimStyle}>
-            <EndRoundButton colorScale={colorScale} onPress={handleEnd} label="End Round" />
+            <EndRoundButton
+              colorScale={colorScale}
+              onPress={handleEnd}
+              label="End Round"
+            />
           </Animated.View>
           <Animated.View style={spilledAnimStyle}>
-            <SpilledButton colorScale={colorScale} onPress={handleAnswered} label="Spilled" />
+            <SpilledButton
+              colorScale={colorScale}
+              onPress={handleAnswered}
+              label="Spilled"
+            />
           </Animated.View>
           <Animated.View style={sidesAnimStyle}>
-            <PassButton colorScale={colorScale} onPress={handlePass} label="Pass" />
+            <PassButton
+              colorScale={colorScale}
+              onPress={handlePass}
+              label="Pass"
+            />
           </Animated.View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -396,6 +439,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  cardGroup: {
+    alignItems: "center",
+  },
 
   // ── Progress bar ──
   progressWrapper: {
@@ -421,13 +467,9 @@ const styles = StyleSheet.create({
   },
 
   // ── Timer ──
-  timerSlot: {
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: Tokens.spacing[3],
-  },
   timerPill: {
+    position: "absolute",
+    right: Tokens.spacing[5],
     flexDirection: "row",
     alignItems: "center",
     gap: Tokens.spacing[1],
@@ -509,7 +551,10 @@ const styles = StyleSheet.create({
 
   // ── Actions ──
   actionsSlot: {
-    justifyContent: "center",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingTop: Tokens.spacing[3],
     paddingBottom: Tokens.spacing[8],
   },
