@@ -15,12 +15,15 @@ import Svg, { Path } from "react-native-svg";
 import { DiamondGrid } from "@/components/diamond-grid";
 import { Tokens } from "@/constants/tokens";
 
+export type ColorScaleKey = 'blue' | 'purple' | 'orange' | 'teal' | 'red' | 'pink';
+
 export type DeckData = {
   id: string;
   title: string;
   bgColor: string;
   bgLight: string;
   icon: IconSvgElement;
+  colorKey: ColorScaleKey;
 };
 
 type Props = {

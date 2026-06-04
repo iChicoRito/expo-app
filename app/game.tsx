@@ -1,12 +1,9 @@
 import {
   ArrowLeft01Icon,
   ArrowReloadHorizontalIcon,
-  ArrowRight01Icon,
-  Cancel01Icon,
   Clock01Icon,
-  Tick02Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -23,14 +20,18 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
+import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
+import { PassButton } from "@/components/svg-buttons/pass-button";
+import { SpilledButton } from "@/components/svg-buttons/spilled-button";
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
-import { getDeckById } from "@/constants/decks";
+import { getDeckById, getDeckColorScale } from "@/constants/decks";
 import { getQuestionsForDeck } from "@/constants/questions";
 import { Tokens } from "@/constants/tokens";
 
@@ -53,6 +54,9 @@ export default function GameScreen() {
   }>();
   const deck = getDeckById(deckId);
   const accent = deck?.bgColor ?? Tokens.colors.teal[500];
+  const colorScale = deck
+    ? getDeckColorScale(deck)
+    : { c300: Tokens.colors.teal[300], c400: Tokens.colors.teal[400], c500: Tokens.colors.teal[500], c600: Tokens.colors.teal[600] };
   const questions = getQuestionsForDeck(deckId);
   const total = questions.length;
 
@@ -74,6 +78,34 @@ export default function GameScreen() {
   useEffect(() => {
     progressValue.value = withTiming(currentIndex + 1, { duration: 300 });
   }, [currentIndex, progressValue]);
+
+  // Button entrance: Spilled rises first, End Round + Pass follow 130ms later.
+  const spilledTY = useSharedValue(36);
+  const spilledOpacity = useSharedValue(0);
+  const sidesTY = useSharedValue(36);
+  const sidesOpacity = useSharedValue(0);
+  useEffect(() => {
+    if (flipped) {
+      spilledTY.value = withTiming(0, { duration: 340, easing: Easing.out(Easing.cubic) });
+      spilledOpacity.value = withTiming(1, { duration: 280 });
+      sidesTY.value = withDelay(130, withTiming(0, { duration: 340, easing: Easing.out(Easing.cubic) }));
+      sidesOpacity.value = withDelay(130, withTiming(1, { duration: 280 }));
+    } else {
+      spilledTY.value = 36;
+      spilledOpacity.value = 0;
+      sidesTY.value = 36;
+      sidesOpacity.value = 0;
+    }
+  }, [flipped, spilledTY, spilledOpacity, sidesTY, sidesOpacity]);
+
+  const spilledAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: spilledTY.value }],
+    opacity: spilledOpacity.value,
+  }));
+  const sidesAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: sidesTY.value }],
+    opacity: sidesOpacity.value,
+  }));
 
   const frontStyle = useAnimatedStyle(() => ({
     transform: [
@@ -314,57 +346,22 @@ export default function GameScreen() {
 
       {/* ── Actions (visible once flipped) ── */}
       <View style={styles.actionsSlot}>
-        {flipped && (
-          <View style={styles.actionsRow} pointerEvents={isTransitioning ? "none" : "auto"}>
-            <ActionButton
-              icon={Cancel01Icon}
-              label="End Round"
-              accent={accent}
-              onPress={handleEnd}
-            />
-            <ActionButton
-              icon={Tick02Icon}
-              label="Spilled"
-              accent={accent}
-              onPress={handleAnswered}
-            />
-            <ActionButton
-              icon={ArrowRight01Icon}
-              label="Pass"
-              accent={accent}
-              onPress={handlePass}
-            />
-          </View>
-        )}
+        <View style={styles.actionsRow} pointerEvents={isTransitioning || !flipped ? "none" : "auto"}>
+          <Animated.View style={sidesAnimStyle}>
+            <EndRoundButton colorScale={colorScale} onPress={handleEnd} label="End Round" />
+          </Animated.View>
+          <Animated.View style={spilledAnimStyle}>
+            <SpilledButton colorScale={colorScale} onPress={handleAnswered} label="Spilled" />
+          </Animated.View>
+          <Animated.View style={sidesAnimStyle}>
+            <PassButton colorScale={colorScale} onPress={handlePass} label="Pass" />
+          </Animated.View>
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
-function ActionButton({
-  icon,
-  label,
-  accent,
-  onPress,
-}: {
-  icon: IconSvgElement;
-  label: string;
-  accent: string;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      style={styles.action}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.actionCircle}>
-        <HugeiconsIcon icon={icon} size={24} color={accent} />
-      </View>
-      <Text style={styles.actionLabel}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -512,33 +509,16 @@ const styles = StyleSheet.create({
 
   // ── Actions ──
   actionsSlot: {
-    height: 96,
     justifyContent: "center",
-    paddingBottom: Tokens.spacing[4],
+    paddingTop: Tokens.spacing[3],
+    paddingBottom: Tokens.spacing[8],
   },
   actionsRow: {
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "flex-end",
     gap: Tokens.spacing[10],
   },
-  action: {
-    alignItems: "center",
-    gap: Tokens.spacing[2],
-  },
-  actionCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Tokens.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionLabel: {
-    color: Tokens.colors.white,
-    fontSize: Tokens.typography.fontSize.sm,
-    fontWeight: Tokens.typography.fontWeight.semibold,
-  },
-
   // ── Empty state ──
   emptyState: {
     flex: 1,
