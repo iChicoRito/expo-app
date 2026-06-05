@@ -13,34 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { useDeckStore } from "@/contexts/deck-store";
+import { resolveScenario } from "@/lib/scenario";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-/**
- * Pick the end-game result purely from the answered/passed tallies:
- * - answered 0          → "Certified Dodger" (ended without answering anything)
- * - some answered + any pass → "Almost Spilled Everything"
- * - answered, zero passes    → "You Spilled Everything"
- */
-function resolveScenario(answered: number, passed: number, name: string) {
-  if (answered === 0) {
-    return {
-      title: `Certified Dodger, ${name}`,
-      subtitle: "You passed every question. Suspicious, but we'll allow it.",
-    };
-  }
-  if (passed > 0) {
-    return {
-      title: `Almost Spilled Everything, ${name}`,
-      subtitle: "You finished the deck, but some tea stayed unspilled.",
-    };
-  }
-  return {
-    title: `You Spilled Everything, ${name}`,
-    subtitle: "You survived the questions. Honestly, iconic behavior.",
-  };
-}
 
 export default function ResultsScreen() {
   const router = useRouter();

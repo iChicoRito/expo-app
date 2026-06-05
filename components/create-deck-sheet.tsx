@@ -6,6 +6,7 @@ import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -72,7 +73,12 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
       />
 
       <Text style={styles.label}>Icon</Text>
-      <View style={styles.iconGrid}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.iconScroll}
+        contentContainerStyle={styles.iconRow}
+      >
         {DECK_ICON_KEYS.map((key) => {
           const selected = key === iconKey;
           return (
@@ -95,10 +101,15 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
 
       <Text style={styles.label}>Color Selection</Text>
-      <View style={styles.swatchRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.swatchScroll}
+        contentContainerStyle={styles.swatchRow}
+      >
         {DECK_COLOR_SWATCHES.map((key) => {
           const selected = key === colorKey;
           return (
@@ -118,7 +129,7 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
 
       <TouchableOpacity
         style={[styles.submit, !canSubmit && styles.submitDisabled]}
@@ -155,10 +166,14 @@ const styles = StyleSheet.create({
     fontSize: Tokens.typography.fontSize.base,
     color: Tokens.colors.neutral[900],
   },
-  iconGrid: {
+  iconScroll: {
+    marginTop: Tokens.spacing[2],
+    marginBottom: Tokens.spacing[2],
+  },
+  iconRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: Tokens.spacing[2],
+    paddingHorizontal: Tokens.spacing[0],
   },
   iconCell: {
     width: 44,
@@ -169,10 +184,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  swatchScroll: {
+    marginTop: Tokens.spacing[2],
+    marginBottom: Tokens.spacing[2],
+  },
   swatchRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: Tokens.spacing[3],
+    paddingHorizontal: Tokens.spacing[0],
   },
   swatch: {
     width: 36,

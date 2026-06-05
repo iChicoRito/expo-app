@@ -168,6 +168,7 @@ export default function PlayScreen() {
         active="play"
         onSelect={(tab) => {
           if (tab === "deck") router.push("/decks");
+          if (tab === "profile") router.push("/profile");
         }}
       />
     </SafeAreaView>

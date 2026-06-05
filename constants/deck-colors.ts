@@ -8,14 +8,23 @@ import { Tokens } from "@/constants/tokens";
 
 /** Ordered swatches shown in the Create Deck color picker (mirrors the Figma row). */
 export const DECK_COLOR_SWATCHES: ColorScaleKey[] = [
-  "blue",
-  "orange",
-  "teal",
   "red",
-  "violet",
-  "pink",
-  "purple",
+  "orange",
+  "amber",
+  "yellow",
+  "lime",
+  "green",
+  "emerald",
+  "teal",
   "cyan",
+  "sky",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "fuchsia",
+  "pink",
+  "rose",
 ];
 
 /** The solid (500) hex for a color key — used for swatch fills and accents. */

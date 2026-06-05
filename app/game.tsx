@@ -33,6 +33,8 @@ import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
 import { getDeckColorScale } from "@/constants/decks";
 import { useDeckStore } from "@/contexts/deck-store";
+import { useProfileStore } from "@/contexts/profile-store";
+import { resolveScenario } from "@/lib/scenario";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -49,6 +51,7 @@ function formatTime(seconds: number): string {
 export default function GameScreen() {
   const router = useRouter();
   const { getDeckById, getQuestions } = useDeckStore();
+  const { recordSession } = useProfileStore();
   const { deckId, name } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
@@ -171,6 +174,22 @@ export default function GameScreen() {
 
   const goToResults = useCallback(
     (answered: number, passed: number) => {
+      // Record the real session + roll up stats before leaving the game. This
+      // is the single funnel for all end paths (deck finished, End Round,
+      // timeout-pass), so every completed round lands in Play History.
+      if (deck) {
+        const displayName = name?.trim() || "Friend";
+        const { title, node } = resolveScenario(answered, passed, displayName);
+        recordSession({
+          deckId: deck.id,
+          deckTitle: deck.title,
+          colorKey: deck.colorKey,
+          subtitle: title,
+          node,
+          answered,
+          passed,
+        });
+      }
       router.replace({
         pathname: "/results",
         params: {
@@ -181,7 +200,7 @@ export default function GameScreen() {
         },
       });
     },
-    [router, deckId, name],
+    [router, deckId, name, deck, recordSession],
   );
 
   // Advance to the next question, or end the game if the deck is finished.

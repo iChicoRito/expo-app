@@ -63,6 +63,7 @@ type DeckStoreValue = {
   getQuestions: (deckId: string | undefined) => string[];
   getCardCount: (deckId: string | undefined) => number;
   createDeck: (input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => Promise<StoreDeck>;
+  deleteDeck: (deckId: string) => Promise<void>;
   addQuestion: (deckId: string, text: string) => Promise<void>;
   editQuestion: (deckId: string, questionId: string, text: string) => Promise<void>;
   deleteQuestion: (deckId: string, questionId: string) => Promise<void>;
@@ -225,6 +226,18 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
     [userDecks, persistDecks],
   );
 
+  const deleteDeck = useCallback<DeckStoreValue["deleteDeck"]>(
+    async (deckId) => {
+      if (BUILTIN_IDS.has(deckId)) return; // built-in decks cannot be deleted
+      await persistDecks(userDecks.filter((d) => d.id !== deckId));
+      if (userQuestions[deckId]) {
+        const { [deckId]: _removed, ...rest } = userQuestions;
+        await persistQuestions(rest);
+      }
+    },
+    [userDecks, userQuestions, persistDecks, persistQuestions],
+  );
+
   const addQuestion = useCallback<DeckStoreValue["addQuestion"]>(
     async (deckId, text) => {
       if (BUILTIN_IDS.has(deckId)) return; // built-in decks are read-only
@@ -300,6 +313,7 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
       getQuestions,
       getCardCount,
       createDeck,
+      deleteDeck,
       addQuestion,
       editQuestion,
       deleteQuestion,
@@ -314,6 +328,7 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
       getQuestions,
       getCardCount,
       createDeck,
+      deleteDeck,
       addQuestion,
       editQuestion,
       deleteQuestion,

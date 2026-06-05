@@ -141,6 +141,7 @@ export default function DecksScreen() {
         active="deck"
         onSelect={(tab) => {
           if (tab === "play") router.push("/play");
+          if (tab === "profile") router.push("/profile");
         }}
       />
 

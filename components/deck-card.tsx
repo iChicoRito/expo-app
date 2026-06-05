@@ -16,14 +16,23 @@ import { DiamondGrid } from "@/components/diamond-grid";
 import { Tokens } from "@/constants/tokens";
 
 export type ColorScaleKey =
-  | 'blue'
-  | 'purple'
-  | 'orange'
-  | 'teal'
   | 'red'
-  | 'pink'
+  | 'orange'
+  | 'amber'
+  | 'yellow'
+  | 'lime'
+  | 'green'
+  | 'emerald'
+  | 'teal'
+  | 'cyan'
+  | 'sky'
+  | 'blue'
+  | 'indigo'
   | 'violet'
-  | 'cyan';
+  | 'purple'
+  | 'fuchsia'
+  | 'pink'
+  | 'rose';
 
 export type DeckData = {
   id: string;

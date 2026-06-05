@@ -1,102 +1,113 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working in this repository.
 
 @AGENTS.md
+
+## Non-Negotiables
+
+- This is an Expo SDK 54 project. Before writing Expo code, read the exact versioned docs: https://docs.expo.dev/versions/v54.0.0/
+- Use the existing npm workflow and keep `package-lock.json`.
+- Target Android first. Do not reintroduce removed Expo starter, web, or iOS demo surfaces unless explicitly requested.
+- Avoid bringing back these removed starter artifacts: `app/(tabs)`, `app/modal.tsx`, React logo demo assets, starter themed components/hooks, and web/iOS-only demo dependencies.
+- Keep changes scoped to the requested feature or fix. Do not delete files unless explicitly asked.
 
 ## Commands
 
 ```bash
-npx expo start          # Start dev server (scan QR with Expo Go, or press a/i/w for emulators)
+npm install
+npx expo start
 npx expo start --android
-npx expo start --ios
-npx expo start --web
-npm run lint            # Run ESLint (expo lint)
-npm run reset-project   # Move starter code to app-example/ and create blank app/
+npx tsc --noEmit
+npm run lint
+npx expo-doctor
+npx expo export --platform android --clear
 ```
 
-TypeScript checking: `npx tsc --noEmit`
+`npm run reset-project` exists, but do not use it as normal workflow because this app is no longer the Expo starter app.
 
 ## Commit Message Guidelines
 
-Format commit messages to clearly document the "what" and "why" of changes. When creating commits, follow this structure:
+Use this format:
 
-**Format:**
-```
+```text
 <type>(<scope>): <subject (50 chars max, imperative mood)>
 
 Main changes:
-• <point 1 — what changed and why>
-• <point 2 — what changed and why>
-• <point 3 — what changed and why>
+- <point 1: what changed and why>
+- <point 2: what changed and why>
+- <point 3: what changed and why>
 ```
 
-**Type:** Choose one:
-- `feat` — New feature or capability
-- `fix` — Bug fix
-- `refactor` — Code restructuring without behavior changes
-- `docs` — Documentation updates
-- `style` — Formatting, linting (no functional changes)
-- `test` — Adding or updating tests
-- `perf` — Performance improvements
-- `chore` — Dependencies, build config, maintenance
-
-**Scope:** Optional. Use component/file name when relevant (e.g., `feat(game)`, `fix(carousel)`). Omit if not applicable.
-
-**Subject:** Imperative mood ("add", not "added" or "adds"). Max 50 characters.
-
-**Main changes:** 3–5 bullet points capturing the significant changes. Focus on intent, not implementation details.
-
-**Example:**
-```
-feat(game): implement card transition animations
-
-Main changes:
-• Exit animation: card slides upward 350ms (ease-in) while flipping, with motion blur overlay
-• Entrance animation: next card slides up from below 280ms (ease-out) into center position
-• Interaction blocking: isTransitioning flag prevents taps during sequence
-• Motion blur: expo-blur overlay fades in as card exits for visual richness
-```
+Types:
+- `feat`: New feature or capability
+- `fix`: Bug fix
+- `refactor`: Code restructuring without behavior changes
+- `docs`: Documentation updates
+- `style`: Formatting, linting, no functional changes
+- `test`: Adding or updating tests
+- `perf`: Performance improvements
+- `chore`: Dependencies, build config, maintenance
 
 ## Architecture
 
-This is an **Expo SDK 54** app using **Expo Router v6** (file-based routing), **React 19**, and **React Native 0.81** with the New Architecture enabled.
+This is an Android-focused Expo SDK 54 app using Expo Router v6, React 19, React Native 0.81, New Architecture, typed routes, and React Compiler.
 
-### Routing
+Root setup:
+- `app/_layout.tsx` defines the Stack navigator and wraps the app with `DeckStoreProvider` and `ProfileStoreProvider`.
+- `@/` maps to the repository root via `tsconfig.json`.
+- `app.json` enables Android edge-to-edge, Expo Router, SecureStore, splash screen config, and `expo-build-properties`.
+- `eas.json` keeps Android preview/development builds as APKs and production as an app bundle.
+- `.easignore` excludes non-build folders such as Figma references, prompts, editor metadata, caches, and `node_modules`.
 
-- `app/_layout.tsx` — Root layout; wraps the app in React Navigation's `ThemeProvider` with auto dark/light theming. Defines a Stack navigator with `(tabs)` and `modal` screens.
-- `app/(tabs)/_layout.tsx` — Tab navigator with two tabs: Home (`index`) and Explore.
-- `app/(tabs)/index.tsx`, `app/(tabs)/explore.tsx` — Tab screen content.
-- `app/modal.tsx` — Modal screen presented over the tab navigator.
-- `unstable_settings.anchor` is set to `(tabs)` so deep links land on the tabs group.
+Current routes:
+- `app/index.tsx`: SecureStore-based entry redirect
+- `app/onboarding.tsx`: first-run name collection
+- `app/play.tsx`: deck carousel and main play hub
+- `app/preparation.tsx`: pre-game transition screen
+- `app/game.tsx`: flip-card gameplay
+- `app/results.tsx`: end-game result screen
+- `app/decks.tsx`: deck list and custom deck creation
+- `app/questions.tsx`: question list, CRUD, and AI generation
+- `app/profile.tsx`: profile/settings hub
+- `app/play-history.tsx`: completed session timeline
+- `app/decks-cards.tsx`: built-in/custom deck management
 
-### Theming
+## State And Data
 
-- `constants/theme.ts` — Exports `Colors` (light/dark palettes) and `Fonts` (platform-specific font stacks via `Platform.select`).
-- `hooks/use-color-scheme.ts` — Wraps React Native's `useColorScheme`; `.web.ts` variant overrides for web.
-- `hooks/use-theme-color.ts` — Resolves a color token from `Colors` for the current scheme, with per-component light/dark overrides.
-- `components/themed-text.tsx` / `components/themed-view.tsx` — Base components that consume `useThemeColor`. Use these instead of raw `Text`/`View` for theme-aware text and backgrounds.
+- `contexts/deck-store.tsx` is the central deck/question store. It merges built-in decks with AsyncStorage-backed custom decks/questions.
+- Built-in decks are read-only. Custom decks support create/delete and question CRUD.
+- `lib/groq.ts` handles Groq question generation. Keep the current behavior unless the task is specifically about AI generation.
+- `lib/rate-limit.ts` contains pure AI rate-limit helpers for the hourly generation window.
+- `lib/network.ts` provides the Expo Network connectivity check before AI calls.
+- `contexts/profile-store.tsx` owns profile state, settings, audio levels, game stats, and play history persistence.
+- `lib/scenario.ts` resolves game-end title/subtitle/node values shared by results and history recording.
 
-### Path Aliases
+## UI System
 
-`@/` maps to the repo root (configured in `tsconfig.json`). All internal imports use this alias.
+- Use the existing React Native components, `constants/tokens.ts`, and `@hugeicons/react-native` icon pattern.
+- Do not introduce a new UI framework unless explicitly requested.
+- Lists that can grow should use `FlatList` with stable keys and render callbacks.
+- Expensive repeated visuals should stay memoized where practical.
+- `app/game.tsx` uses Reanimated for flip/transition behavior and mounts `BlurView` only during transition work.
+- `components/sheet.tsx`, `components/dialog.tsx`, and related sheets/popovers are the shared modal patterns.
 
-### Game Screen (In-Game Page)
+## Profile And Avatar System
 
-- `app/game.tsx` — Main game screen for flipping card gameplay. Manages card state, animations, and player actions.
-  - **Card Flip Animation**: 3D Y-axis rotation (500ms) when tapped; uses `flip` shared value with `rotateY` interpolation.
-  - **Card Transitions**: When Answered/Pass buttons are pressed:
-    - Exit: Current card slides upward (350ms, ease-in cubic) while continuing to flip (rotation 1→2), triggering motion blur overlay (intensity 30, opacity fade).
-    - Entrance: Next card slides up from below (280ms, ease-out cubic) into center, lands in unflipped state.
-    - Interaction: `isTransitioning` flag blocks card taps and button presses during ~500ms sequence; `pointerEvents="none"` on blur overlay.
-  - **Animations**: Uses React Native Reanimated v4.1.1 (`useSharedValue`, `useAnimatedStyle`, `withTiming`, `interpolate`, `Easing`, `runOnJS`).
-  - **Motion Blur**: `expo-blur` BlurView with animated opacity tied to exit animation progress.
-  - **Header**: Centered Spillr logo with back button absolutely positioned on left.
-- `app/results.tsx` — Results/end-game screen with same header layout (centered logo).
+- `components/avatar.tsx` renders selected SVG avatars.
+- `components/edit-profile-sheet.tsx` edits name, avatar, and profile color.
+- `components/music-sound-sheet.tsx`, `components/value-slider.tsx`, and `components/toggle-switch.tsx` implement profile settings controls.
+- `components/stat-badge.tsx`, `components/settings-row.tsx`, and `components/timeline-row.tsx` are reusable profile/history rows.
+- `assets/svg/avatars/` contains `user-avatar-1.svg` through `user-avatar-18.svg`.
+- `constants/avatars.ts` is the avatar registry.
+- `declarations.d.ts` declares SVG imports for TypeScript.
+- `metro.config.js` must extend `expo/metro-config` and configure `react-native-svg-transformer` for avatar SVG imports.
 
-### Key Configs
+## Build And Verification
 
-- `app.json`: New Architecture (`newArchEnabled: true`), React Compiler (`reactCompiler: true`), typed routes enabled.
-- `eslint.config.js`: Uses `eslint-config-expo`.
-- `package.json`: Includes `expo-blur` for motion blur effects.
-- No test runner is configured in this project yet.
+- Android release shrinking is configured with `expo-build-properties`:
+  - `enableMinifyInReleaseBuilds`
+  - `enableShrinkResourcesInReleaseBuilds`
+  - `enablePngCrunchInReleaseBuilds`
+- Run `npx tsc --noEmit`, `npm run lint`, `npx expo-doctor`, and `npx expo export --platform android --clear` after meaningful code/config changes.
+- No test runner is configured yet.
