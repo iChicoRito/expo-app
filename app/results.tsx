@@ -51,7 +51,7 @@ export default function ResultsScreen() {
   );
 
   useEffect(() => {
-    playSfx("ending-screen");
+    playSfx("yehey");
   }, [playSfx]);
 
   const goHome = () =>
