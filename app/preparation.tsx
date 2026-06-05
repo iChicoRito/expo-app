@@ -2,6 +2,11 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
@@ -20,6 +25,18 @@ export default function PreparationScreen() {
   const prefix = "You are about to play the ";
   const fullText = prefix + deckTitle;
   const [revealed, setRevealed] = useState(0);
+  const textDone = revealed >= fullText.length;
+
+  const buttonOpacity = useSharedValue(0);
+  useEffect(() => {
+    if (textDone) {
+      buttonOpacity.value = withTiming(1, { duration: 400 });
+    }
+  }, [textDone, buttonOpacity]);
+
+  const buttonAnimStyle = useAnimatedStyle(() => ({
+    opacity: buttonOpacity.value,
+  }));
 
   useEffect(() => {
     if (revealed >= fullText.length) return;
@@ -44,15 +61,17 @@ export default function PreparationScreen() {
         </Text>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: accent }]}
-          onPress={handleStart}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.buttonText}>Let&apos;s Get Started</Text>
-        </TouchableOpacity>
-      </View>
+      {textDone && (
+        <Animated.View style={[styles.buttonContainer, buttonAnimStyle]}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: accent }]}
+            onPress={handleStart}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.buttonText}>Let&apos;s Get Started</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 }
