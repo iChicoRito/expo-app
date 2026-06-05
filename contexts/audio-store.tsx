@@ -215,11 +215,15 @@ export function AudioStoreProvider({
 
   // ── In-game BGM ──────────────────────────────────────────────────────────
   const onGameFocus = useCallback(async () => {
-    // Lower lobby BGM
+    // Stop and unload lobby BGM — only play in-game music
     lobbyIsFullRef.current = false;
-    try {
-      await lobbySoundRef.current?.setVolumeAsync(musicVol(false));
-    } catch {}
+    if (lobbySoundRef.current) {
+      try {
+        await lobbySoundRef.current.stopAsync();
+        await lobbySoundRef.current.unloadAsync();
+      } catch {}
+      lobbySoundRef.current = null;
+    }
 
     // Prevent concurrent loads
     if (ingameLoadingRef.current) return;
@@ -251,9 +255,34 @@ export function AudioStoreProvider({
 
   const onGameBlur = useCallback(async () => {
     ingameIsFullRef.current = false;
-    try {
-      await ingameSoundRef.current?.setVolumeAsync(musicVol(false));
-    } catch {}
+    // Stop in-game music
+    if (ingameSoundRef.current) {
+      try {
+        await ingameSoundRef.current.stopAsync();
+        await ingameSoundRef.current.unloadAsync();
+      } catch {}
+      ingameSoundRef.current = null;
+    }
+    // Restore lobby music at full volume
+    lobbyIsFullRef.current = true;
+    if (!lobbySoundRef.current) {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          LOBBY_BGM[lobbyTrackRef.current],
+          { isLooping: true, volume: musicVol(true) },
+        );
+        lobbySoundRef.current = sound;
+        await sound.playAsync();
+      } catch {}
+    } else {
+      try {
+        await lobbySoundRef.current.setVolumeAsync(musicVol(true));
+        const status = await lobbySoundRef.current.getStatusAsync();
+        if (status.isLoaded && !status.isPlaying) {
+          await lobbySoundRef.current.playAsync();
+        }
+      } catch {}
+    }
   }, [musicVol]);
 
   const stopIngameBgm = useCallback(async () => {
