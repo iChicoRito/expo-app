@@ -10,30 +10,35 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, SvgXml } from "react-native-svg";
 
 import { DiamondGrid } from "@/components/diamond-grid";
 import { getCardHolder } from "@/constants/card-holders";
+import {
+  PICKER_ICON_IDS,
+  PICKER_ICON_SVGS,
+  tintDeckIcon,
+} from "@/constants/cards-icons";
 import { Tokens } from "@/constants/tokens";
 
 export type ColorScaleKey =
-  | 'red'
-  | 'orange'
-  | 'amber'
-  | 'yellow'
-  | 'lime'
-  | 'green'
-  | 'emerald'
-  | 'teal'
-  | 'cyan'
-  | 'sky'
-  | 'blue'
-  | 'indigo'
-  | 'violet'
-  | 'purple'
-  | 'fuchsia'
-  | 'pink'
-  | 'rose';
+  | "red"
+  | "orange"
+  | "amber"
+  | "yellow"
+  | "lime"
+  | "green"
+  | "emerald"
+  | "teal"
+  | "cyan"
+  | "sky"
+  | "blue"
+  | "indigo"
+  | "violet"
+  | "purple"
+  | "fuchsia"
+  | "pink"
+  | "rose";
 
 export type DeckData = {
   id: string;
@@ -42,6 +47,7 @@ export type DeckData = {
   bgLight: string;
   icon: IconSvgElement;
   colorKey: ColorScaleKey;
+  iconKey?: string;
 };
 
 type Props = {
@@ -83,7 +89,15 @@ export const DeckCard = memo(function DeckCard({
   onPlay,
 }: Props) {
   const CardHolder = getCardHolder(deck.colorKey);
-  const holderSize = width * 0.62;
+  const holderSize = width * 0.7;
+
+  const pickerIdx = deck.iconKey
+    ? (PICKER_ICON_IDS as readonly string[]).indexOf(deck.iconKey)
+    : -1;
+  const pickerSvg =
+    pickerIdx >= 0
+      ? tintDeckIcon(PICKER_ICON_SVGS[pickerIdx], deck.colorKey)
+      : null;
 
   const visual = useMemo(() => {
     const waveHeight = height * 0.42;
@@ -121,11 +135,7 @@ export const DeckCard = memo(function DeckCard({
   // The card is centered when scrollX === index * itemSize. We interpolate scale
   // and opacity against the same input range so both share one continuous ease.
   const inputRange = useMemo(
-    () => [
-      (index - 1) * itemSize,
-      index * itemSize,
-      (index + 1) * itemSize,
-    ],
+    () => [(index - 1) * itemSize, index * itemSize, (index + 1) * itemSize],
     [index, itemSize],
   );
 
@@ -166,7 +176,11 @@ export const DeckCard = memo(function DeckCard({
       >
         {/* Diamond-grid texture */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <DiamondGrid width={width} height={height} />
+          <DiamondGrid
+            width={width}
+            height={height}
+            color={Tokens.colors[deck.colorKey][400]}
+          />
         </View>
 
         {/* Curved darker band near the bottom */}
@@ -186,18 +200,46 @@ export const DeckCard = memo(function DeckCard({
         </Svg>
 
         {/* Card holder illustration — centered above wave */}
-        <View style={styles.holderCenter} pointerEvents="none">
+        <View
+          style={[
+            styles.holderCenter,
+            { transform: [{ translateY: -height * 0.13 }] },
+          ]}
+          pointerEvents="none"
+        >
           <CardHolder width={holderSize} height={holderSize * 1.1} />
+        </View>
+
+        {/* Deck icon composited over the card holder illustration */}
+        <View
+          style={[
+            styles.holderIconOverlay,
+            {
+              transform: [
+                { translateX: -holderSize * 0.058 },
+                { translateY: -holderSize * 0.054 - height * 0.13 },
+              ],
+            },
+          ]}
+          pointerEvents="none"
+        >
+          {pickerSvg !== null ? (
+            <SvgXml
+              xml={pickerSvg}
+              width={holderSize * 0.45}
+              height={holderSize * 0.45}
+            />
+          ) : (
+            <HugeiconsIcon
+              icon={deck.icon}
+              size={holderSize * 0.38}
+              color={Tokens.colors.white}
+            />
+          )}
         </View>
 
         {/* Content */}
         <View style={styles.content}>
-          <View style={styles.topRow}>
-            <View style={styles.iconBadge}>
-              <HugeiconsIcon icon={deck.icon} size={20} color={deck.bgColor} />
-            </View>
-          </View>
-
           <View style={styles.bottomContent}>
             <Text style={styles.title}>{deck.title}</Text>
             <Animated.View
@@ -243,13 +285,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  holderIconOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: {
     flex: 1,
     padding: Tokens.spacing[5],
-    justifyContent: "space-between",
-  },
-  topRow: {
-    flexDirection: "row",
     justifyContent: "flex-end",
   },
   bottomContent: {
@@ -259,15 +302,7 @@ const styles = StyleSheet.create({
     fontSize: Tokens.typography.fontSize["2xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
-  },
-  iconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Tokens.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: Tokens.spacing[2],
+    textAlign: "center",
   },
   playButton: {
     width: "100%",

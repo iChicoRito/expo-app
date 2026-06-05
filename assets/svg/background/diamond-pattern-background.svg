@@ -1,9 +1,4 @@
-import { memo } from "react";
-import { SvgXml } from "react-native-svg";
-
-// Source: assets/svg/background/diamond-pattern-background.svg
-// preserveAspectRatio added so the tile scales to cover any card size.
-const BASE_SVG = `<svg width="306" height="266" viewBox="0 0 306 266" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="306" height="266" viewBox="0 0 306 266" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M9.65153 0L19.3031 12.0909H0L9.65153 0Z" fill="white"/>
 <path d="M9.65153 24.1818L19.3031 12.0909H0L9.65153 24.1818Z" fill="white"/>
 <path d="M162.591 0L172.243 12.0909H152.939L162.591 0Z" fill="white"/>
@@ -356,22 +351,4 @@ const BASE_SVG = `<svg width="306" height="266" viewBox="0 0 306 266" preserveAs
 <path d="M296.333 193.454L305.879 181.363H286.788L296.333 193.454Z" fill="white"/>
 <path d="M296.333 241.818L305.879 253.909H286.788L296.333 241.818Z" fill="white"/>
 <path d="M296.333 266L305.879 253.909H286.788L296.333 266Z" fill="white"/>
-</svg>`;
-
-type Props = {
-  width: number;
-  height: number;
-  color?: string;
-  opacity?: number;
-};
-
-export const DiamondGrid = memo(function DiamondGrid({
-  width,
-  height,
-  color = "white",
-  opacity = 0.6,
-}: Props) {
-  const svg = BASE_SVG.replace(/fill="white"/g, `fill="${color}"`);
-
-  return <SvgXml xml={svg} width={width} height={height} style={{ opacity }} />;
-});
+</svg>

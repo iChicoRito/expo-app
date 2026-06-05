@@ -30,6 +30,7 @@ export const DECKS: DeckData[] = [
     bgLight: "#EFF6FF",
     icon: DropletIcon,
     colorKey: "blue",
+    iconKey: "decks-icon-2",
   },
   {
     id: "no-dead-air",
@@ -38,6 +39,7 @@ export const DECKS: DeckData[] = [
     bgLight: "#FAF5FF",
     icon: Mic01Icon,
     colorKey: "purple",
+    iconKey: "decks-icon-2",
   },
   {
     id: "drop-lore",
@@ -46,6 +48,7 @@ export const DECKS: DeckData[] = [
     bgLight: "#FFF7ED",
     icon: BookOpen01Icon,
     colorKey: "orange",
+    iconKey: "decks-icon-2",
   },
   {
     id: "chaos-mode",
@@ -54,6 +57,7 @@ export const DECKS: DeckData[] = [
     bgLight: "#F0FDFA",
     icon: WinkIcon,
     colorKey: "teal",
+    iconKey: "decks-icon-2",
   },
   {
     id: "hot-seat",
@@ -62,6 +66,7 @@ export const DECKS: DeckData[] = [
     bgLight: "#FEF2F2",
     icon: FireIcon,
     colorKey: "red",
+    iconKey: "decks-icon-2",
   },
   {
     id: "date-mode",
@@ -70,6 +75,7 @@ export const DECKS: DeckData[] = [
     bgLight: "#FDF2F8",
     icon: FavouriteIcon,
     colorKey: "pink",
+    iconKey: "decks-icon-2",
   },
 ];
 

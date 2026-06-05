@@ -106,6 +106,7 @@ function userDeckToData(deck: UserDeck): StoreDeck {
     bgColor: scale[500],
     bgLight: scale[50],
     icon: getDeckIcon(deck.iconKey),
+    iconKey: deck.iconKey,
     colorKey: deck.colorKey,
     isBuiltIn: false,
   };
