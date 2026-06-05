@@ -373,6 +373,7 @@ type Props = {
   opacity?: number;
   animated?: boolean;
   scrollDuration?: number;
+  svgSource?: string;
 };
 
 export const DiamondGrid = memo(function DiamondGrid({
@@ -382,15 +383,16 @@ export const DiamondGrid = memo(function DiamondGrid({
   opacity = 0.6,
   animated = false,
   scrollDuration = 6000,
+  svgSource = BASE_SVG,
 }: Props) {
-  const svg = BASE_SVG.replace(/fill="white"/g, `fill="${color}"`);
+  const svg = svgSource.replace(/fill="white"/g, `fill="${color}"`);
 
   const translateY = useSharedValue(0);
 
   useEffect(() => {
     if (!animated) return;
     translateY.value = withRepeat(
-      withTiming(-height, { duration: scrollDuration, easing: Easing.linear }),
+      withTiming(height, { duration: scrollDuration, easing: Easing.linear }),
       -1,
       false,
     );
