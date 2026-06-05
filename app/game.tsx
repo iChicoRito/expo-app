@@ -5,9 +5,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { BlurView } from "expo-blur";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+  BackHandler,
   Dimensions,
   Pressable,
   StyleSheet,
@@ -26,12 +27,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Dialog } from "@/components/dialog";
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
 import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
 import { getDeckColorScale } from "@/constants/decks";
+import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { resolveScenario } from "@/lib/scenario";
@@ -75,6 +78,36 @@ export default function GameScreen() {
   const [passedCount, setPassedCount] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(TIMER_SECONDS);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const { onGameFocus, onGameBlur, playSfx } = useAudioStore();
+  const [showExitDialog, setShowExitDialog] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      onGameFocus();
+      return () => {
+        onGameBlur();
+      };
+    }, [onGameFocus, onGameBlur]),
+  );
+
+  const anyCardFlipped = flipped || answeredCount > 0 || passedCount > 0;
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBack = () => {
+        if (anyCardFlipped) {
+          setShowExitDialog(true);
+          playSfx("confirmation-dialog");
+        } else {
+          router.replace({ pathname: "/play", params: { name } });
+        }
+        return true; // always intercept Android hardware back
+      };
+      const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
+      return () => sub.remove();
+    }, [anyCardFlipped, name, router, playSfx]),
+  );
 
   // Card slide transition: 0 = on-screen, negative = above screen, positive = below screen.
   const cardTranslateY = useSharedValue(0);
@@ -252,16 +285,29 @@ export default function GameScreen() {
 
   const handleFlip = () => {
     if (flipped) return;
+    playSfx("flipping-card");
     setFlipped(true);
     flip.value = withTiming(1, { duration: 500 });
   };
 
+  const handleBack = useCallback(() => {
+    if (anyCardFlipped) {
+      setShowExitDialog(true);
+      playSfx("confirmation-dialog");
+    } else {
+      router.replace({ pathname: "/play", params: { name } });
+    }
+  }, [anyCardFlipped, name, router, playSfx]);
+
   const handleEnd = () => goToResults(answeredCount, passedCount);
-  const handleAnswered = () => advance(answeredCount + 1, passedCount);
-  const handlePass = useCallback(
-    () => advance(answeredCount, passedCount + 1),
-    [advance, answeredCount, passedCount],
-  );
+  const handleAnswered = () => {
+    playSfx("card-answered");
+    advance(answeredCount + 1, passedCount);
+  };
+  const handlePass = useCallback(() => {
+    playSfx("card-pass");
+    advance(answeredCount, passedCount + 1);
+  }, [advance, answeredCount, passedCount, playSfx]);
 
   // Countdown — only runs while a question is revealed.
   useEffect(() => {
@@ -313,7 +359,7 @@ export default function GameScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
           activeOpacity={0.7}
         >
           <HugeiconsIcon
@@ -435,6 +481,62 @@ export default function GameScreen() {
           </Animated.View>
         </View>
       </View>
+
+      <Dialog
+        visible={showExitDialog}
+        onClose={() => setShowExitDialog(false)}
+        dismissOnBackdrop
+        title="Leave game?"
+        message="Are you sure you want to leave? Your progress will be lost."
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            marginTop: 16,
+            width: "100%",
+          }}
+        >
+          <TouchableOpacity
+            style={[
+              styles.dialogBtn,
+              { flex: 1, backgroundColor: Tokens.colors.neutral[100] },
+            ]}
+            onPress={() => setShowExitDialog(false)}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={{
+                fontSize: Tokens.typography.fontSize.base,
+                fontWeight: Tokens.typography.fontWeight.semibold,
+                color: Tokens.colors.neutral[700],
+                textAlign: "center",
+              }}
+            >
+              Stay
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.dialogBtn, { flex: 1, backgroundColor: accent }]}
+            onPress={() => {
+              setShowExitDialog(false);
+              router.replace({ pathname: "/play", params: { name } });
+            }}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={{
+                fontSize: Tokens.typography.fontSize.base,
+                fontWeight: Tokens.typography.fontWeight.semibold,
+                color: Tokens.colors.white,
+                textAlign: "center",
+              }}
+            >
+              Leave
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Dialog>
     </SafeAreaView>
   );
 }
@@ -597,6 +699,15 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     gap: Tokens.spacing[6],
   },
+  // ── Dialog ──
+  dialogBtn: {
+    paddingVertical: Tokens.spacing[3],
+    paddingHorizontal: Tokens.spacing[4],
+    borderRadius: Tokens.layout.borderRadius.xl,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+
   // ── Empty state ──
   emptyState: {
     flex: 1,
