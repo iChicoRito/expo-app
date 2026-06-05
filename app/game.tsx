@@ -6,7 +6,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Dimensions,
@@ -92,21 +92,25 @@ export default function GameScreen() {
   );
 
   const anyCardFlipped = flipped || answeredCount > 0 || passedCount > 0;
+  const anyCardFlippedRef = useRef(anyCardFlipped);
+  useEffect(() => {
+    anyCardFlippedRef.current = anyCardFlipped;
+  }, [anyCardFlipped]);
 
   useFocusEffect(
     useCallback(() => {
       const onBack = () => {
-        if (anyCardFlipped) {
+        if (anyCardFlippedRef.current) {
           setShowExitDialog(true);
           playSfx("confirmation-dialog");
         } else {
           router.replace({ pathname: "/play", params: { name } });
         }
-        return true; // always intercept Android hardware back
+        return true;
       };
       const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
       return () => sub.remove();
-    }, [anyCardFlipped, name, router, playSfx]),
+    }, [name, router, playSfx]),
   );
 
   // Card slide transition: 0 = on-screen, negative = above screen, positive = below screen.
@@ -283,27 +287,31 @@ export default function GameScreen() {
     [currentIndex, total, goToResults, flip, cardTranslateY],
   );
 
-  const handleFlip = () => {
+  const handleFlip = useCallback(() => {
     if (flipped) return;
     playSfx("flipping-card");
     setFlipped(true);
     flip.value = withTiming(1, { duration: 500 });
-  };
+  }, [flipped, playSfx, flip]);
 
   const handleBack = useCallback(() => {
-    if (anyCardFlipped) {
+    if (anyCardFlippedRef.current) {
       setShowExitDialog(true);
       playSfx("confirmation-dialog");
     } else {
       router.replace({ pathname: "/play", params: { name } });
     }
-  }, [anyCardFlipped, name, router, playSfx]);
+  }, [name, router, playSfx]);
 
-  const handleEnd = () => goToResults(answeredCount, passedCount);
-  const handleAnswered = () => {
+  const handleEnd = useCallback(
+    () => goToResults(answeredCount, passedCount),
+    [goToResults, answeredCount, passedCount],
+  );
+
+  const handleAnswered = useCallback(() => {
     playSfx("card-answered");
     advance(answeredCount + 1, passedCount);
-  };
+  }, [playSfx, advance, answeredCount, passedCount]);
   const handlePass = useCallback(() => {
     playSfx("card-pass");
     advance(answeredCount, passedCount + 1);
