@@ -5,7 +5,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { BlurView } from "expo-blur";
-import { useLocalSearchParams, useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
@@ -34,16 +34,18 @@ import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
 import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
 import { getDeckColorScale } from "@/constants/decks";
+import { Tokens } from "@/constants/tokens";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { resolveScenario } from "@/lib/scenario";
-import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.82;
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
 const TIMER_SECONDS = 120; // fixed 2-minute round
+const DIAGONAL_SCALE = 1.6;
+const DIAGONAL_ANGLE = 30; // degrees — must be ≥25 per spec
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -356,11 +358,17 @@ export default function GameScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: accent }]}>
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <DiamondGrid
-          width={SCREEN_WIDTH}
-          height={SCREEN_HEIGHT}
-          opacity={0.1}
-        />
+        <View style={styles.bgClip}>
+          <View style={styles.bgRotated}>
+            <DiamondGrid
+              width={SCREEN_WIDTH * DIAGONAL_SCALE}
+              height={SCREEN_HEIGHT * DIAGONAL_SCALE}
+              opacity={0.1}
+              animated
+              scrollDuration={8000}
+            />
+          </View>
+        </View>
       </View>
 
       {/* ── Header ── */}
@@ -399,20 +407,35 @@ export default function GameScreen() {
             >
               <View style={styles.cardSizer}>
                 {/* Front — unflipped */}
-                <Animated.View style={[styles.cardFace, frontStyle]}>
+                <Animated.View
+                  style={[styles.cardFace, styles.cardFront, frontStyle]}
+                >
                   <View
-                    style={[styles.deckPill, { backgroundColor: deck.bgLight }]}
-                  >
-                    <HugeiconsIcon icon={deck.icon} size={14} color={accent} />
-                    <Text style={[styles.deckPillText, { color: accent }]}>
-                      {deck.title}
-                    </Text>
-                  </View>
+                    style={[styles.cardInnerBorder, { borderColor: accent }]}
+                    pointerEvents="none"
+                  />
                   <View style={styles.cardCenter}>
-                    <Text style={styles.questionLabel}>Question</Text>
-                    <Text style={styles.questionNumber}>
-                      No. {currentIndex + 1}
-                    </Text>
+                    <View
+                      style={[
+                        styles.deckPill,
+                        { backgroundColor: deck.bgLight },
+                      ]}
+                    >
+                      <HugeiconsIcon
+                        icon={deck.icon}
+                        size={14}
+                        color={accent}
+                      />
+                      <Text style={[styles.deckPillText, { color: accent }]}>
+                        {deck.title}
+                      </Text>
+                    </View>
+                    <View style={styles.questionTitleGroup}>
+                      <Text style={styles.questionLabel}>Question</Text>
+                      <Text style={styles.questionNumber}>
+                        No. {currentIndex + 1}
+                      </Text>
+                    </View>
                   </View>
                   <View style={styles.flipHint}>
                     <Text style={[styles.flipHintText, { color: accent }]}>
@@ -430,6 +453,10 @@ export default function GameScreen() {
                 <Animated.View
                   style={[styles.cardFace, styles.cardBack, backStyle]}
                 >
+                  <View
+                    style={[styles.cardInnerBorder, { borderColor: accent }]}
+                    pointerEvents="none"
+                  />
                   <Text style={styles.questionText}>
                     {questions[currentIndex]}
                   </Text>
@@ -640,6 +667,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  cardFront: {
+    justifyContent: "center",
+  },
+  cardInnerBorder: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    bottom: 12,
+    left: 12,
+    borderWidth: 4,
+    borderRadius: 24,
+  },
   cardBack: {
     alignItems: "center",
     justifyContent: "center",
@@ -665,9 +704,13 @@ const styles = StyleSheet.create({
   },
   cardCenter: {
     alignItems: "center",
+    gap: Tokens.spacing[2],
+  },
+  questionTitleGroup: {
+    alignItems: "center",
   },
   questionLabel: {
-    fontSize: Tokens.typography.fontSize["5xl"],
+    fontSize: Tokens.typography.fontSize["6xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.zinc[900],
   },
@@ -677,6 +720,8 @@ const styles = StyleSheet.create({
     color: Tokens.colors.zinc[900],
   },
   flipHint: {
+    position: "absolute",
+    bottom: Tokens.spacing[10],
     alignItems: "center",
     gap: Tokens.spacing[1],
   },
@@ -739,5 +784,15 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
+  },
+  bgClip: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden",
+  },
+  bgRotated: {
+    position: "absolute",
+    top: -(SCREEN_HEIGHT * ((DIAGONAL_SCALE - 1) / 2)),
+    left: -(SCREEN_WIDTH * ((DIAGONAL_SCALE - 1) / 2)),
+    transform: [{ rotate: `${DIAGONAL_ANGLE}deg` }],
   },
 });
