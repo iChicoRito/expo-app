@@ -1,4 +1,12 @@
-import { memo } from "react";
+import { memo, useEffect } from "react";
+import { View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 import { SvgXml } from "react-native-svg";
 
 // Source: assets/svg/background/diamond-pattern-background.svg
@@ -363,6 +371,8 @@ type Props = {
   height: number;
   color?: string;
   opacity?: number;
+  animated?: boolean;
+  scrollDuration?: number;
 };
 
 export const DiamondGrid = memo(function DiamondGrid({
@@ -370,8 +380,36 @@ export const DiamondGrid = memo(function DiamondGrid({
   height,
   color = "white",
   opacity = 0.6,
+  animated = false,
+  scrollDuration = 3000,
 }: Props) {
   const svg = BASE_SVG.replace(/fill="white"/g, `fill="${color}"`);
 
-  return <SvgXml xml={svg} width={width} height={height} style={{ opacity }} />;
+  const translateY = useSharedValue(0);
+
+  useEffect(() => {
+    if (!animated) return;
+    translateY.value = withRepeat(
+      withTiming(-height, { duration: scrollDuration, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, [animated, height, scrollDuration, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  if (!animated) {
+    return <SvgXml xml={svg} width={width} height={height} style={{ opacity }} />;
+  }
+
+  return (
+    <View style={{ width, height, overflow: "hidden", opacity }}>
+      <Animated.View style={animStyle}>
+        <SvgXml xml={svg} width={width} height={height} />
+        <SvgXml xml={svg} width={width} height={height} />
+      </Animated.View>
+    </View>
+  );
 });
