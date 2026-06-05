@@ -26,6 +26,7 @@ type AudioStoreValue = {
   onLobbyBlur: () => Promise<void>;
   onGameFocus: () => Promise<void>;
   onGameBlur: () => Promise<void>;
+  stopIngameBgm: () => Promise<void>;
   playSfx: (key: SfxKey) => void;
 };
 
@@ -255,6 +256,17 @@ export function AudioStoreProvider({
     } catch {}
   }, [musicVol]);
 
+  const stopIngameBgm = useCallback(async () => {
+    ingameIsFullRef.current = false;
+    if (ingameSoundRef.current) {
+      try {
+        await ingameSoundRef.current.stopAsync();
+        await ingameSoundRef.current.unloadAsync();
+      } catch {}
+      ingameSoundRef.current = null;
+    }
+  }, []);
+
   // ── SFX playback ─────────────────────────────────────────────────────────
   const playSfx = useCallback(
     (key: SfxKey) => {
@@ -275,9 +287,10 @@ export function AudioStoreProvider({
       onLobbyBlur,
       onGameFocus,
       onGameBlur,
+      stopIngameBgm,
       playSfx,
     }),
-    [onLobbyFocus, onLobbyBlur, onGameFocus, onGameBlur, playSfx],
+    [onLobbyFocus, onLobbyBlur, onGameFocus, onGameBlur, stopIngameBgm, playSfx],
   );
 
   return (

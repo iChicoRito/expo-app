@@ -1,6 +1,6 @@
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -42,7 +42,13 @@ export default function ResultsScreen() {
     displayName,
   );
 
-  const { playSfx } = useAudioStore();
+  const { playSfx, stopIngameBgm } = useAudioStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      stopIngameBgm();
+    }, [stopIngameBgm]),
+  );
 
   useEffect(() => {
     playSfx("ending-screen");
