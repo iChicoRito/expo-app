@@ -180,6 +180,7 @@ export const DeckCard = memo(function DeckCard({
             width={width}
             height={height}
             color={Tokens.colors[deck.colorKey][400]}
+            animated
           />
         </View>
 
