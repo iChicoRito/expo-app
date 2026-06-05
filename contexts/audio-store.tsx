@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
 } from "react";
 import { Audio, type AVPlaybackSource } from "expo-av";
@@ -63,14 +64,15 @@ export function AudioStoreProvider({
 
   // Live ref so callbacks always read current volume settings without stale closures
   const audioRef = useRef(audio);
-  useEffect(() => {
-    audioRef.current = audio;
-  }, [audio]);
+  audioRef.current = audio; // keep ref current on every render
 
   // Sound object refs — not state, so updates don't trigger re-renders
   const lobbySoundRef = useRef<Sound | null>(null);
   const ingameSoundRef = useRef<Sound | null>(null);
   const sfxRef = useRef<Partial<Record<SfxKey, Sound>>>({});
+
+  // Guard against concurrent onGameFocus loads
+  const ingameLoadingRef = useRef(false);
 
   // Track whether each BGM is currently at full volume to re-apply correctly
   // when settings change
@@ -139,14 +141,18 @@ export function AudioStoreProvider({
     const fullMusicVol = (a.master / 100) * (a.music / 100);
     const fullSfxVol = (a.master / 100) * (a.sfx / 100);
 
-    lobbySoundRef.current?.setVolumeAsync(
-      lobbyIsFullRef.current ? fullMusicVol : fullMusicVol * LOWERED_FACTOR,
-    );
-    ingameSoundRef.current?.setVolumeAsync(
-      ingameIsFullRef.current ? fullMusicVol : fullMusicVol * LOWERED_FACTOR,
-    );
+    lobbySoundRef.current
+      ?.setVolumeAsync(
+        lobbyIsFullRef.current ? fullMusicVol : fullMusicVol * LOWERED_FACTOR,
+      )
+      .catch(() => {});
+    ingameSoundRef.current
+      ?.setVolumeAsync(
+        ingameIsFullRef.current ? fullMusicVol : fullMusicVol * LOWERED_FACTOR,
+      )
+      .catch(() => {});
     Object.values(sfxRef.current).forEach((s) =>
-      s?.setVolumeAsync(fullSfxVol),
+      s?.setVolumeAsync(fullSfxVol).catch(() => {}),
     );
   }, [audio]);
 
@@ -214,6 +220,10 @@ export function AudioStoreProvider({
       await lobbySoundRef.current?.setVolumeAsync(musicVol(false));
     } catch {}
 
+    // Prevent concurrent loads
+    if (ingameLoadingRef.current) return;
+    ingameLoadingRef.current = true;
+
     // Unload previous in-game track if any
     if (ingameSoundRef.current) {
       try {
@@ -232,7 +242,10 @@ export function AudioStoreProvider({
       });
       ingameSoundRef.current = sound;
       await sound.playAsync();
-    } catch {}
+    } catch {
+    } finally {
+      ingameLoadingRef.current = false;
+    }
   }, [musicVol]);
 
   const onGameBlur = useCallback(async () => {
@@ -250,20 +263,22 @@ export function AudioStoreProvider({
       const vol = sfxVol();
       sound
         .setVolumeAsync(vol)
-        .then(() => sound.setPositionAsync(0))
-        .then(() => sound.playAsync())
+        .then(() => sound.replayAsync())
         .catch(() => {});
     },
     [sfxVol],
   );
 
-  const value: AudioStoreValue = {
-    onLobbyFocus,
-    onLobbyBlur,
-    onGameFocus,
-    onGameBlur,
-    playSfx,
-  };
+  const value = useMemo<AudioStoreValue>(
+    () => ({
+      onLobbyFocus,
+      onLobbyBlur,
+      onGameFocus,
+      onGameBlur,
+      playSfx,
+    }),
+    [onLobbyFocus, onLobbyBlur, onGameFocus, onGameBlur, playSfx],
+  );
 
   return (
     <AudioStoreContext.Provider value={value}>
