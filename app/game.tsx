@@ -365,7 +365,7 @@ export default function GameScreen() {
               height={SCREEN_HEIGHT * DIAGONAL_SCALE}
               opacity={0.1}
               animated
-              scrollDuration={8000}
+              scrollDuration={16000}
             />
           </View>
         </View>

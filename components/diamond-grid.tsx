@@ -381,7 +381,7 @@ export const DiamondGrid = memo(function DiamondGrid({
   color = "white",
   opacity = 0.6,
   animated = false,
-  scrollDuration = 3000,
+  scrollDuration = 6000,
 }: Props) {
   const svg = BASE_SVG.replace(/fill="white"/g, `fill="${color}"`);
 
