@@ -255,7 +255,7 @@ export function AudioStoreProvider({
 
   const onGameBlur = useCallback(async () => {
     ingameIsFullRef.current = false;
-    // Stop in-game music
+    // Stop in-game music when leaving game screen
     if (ingameSoundRef.current) {
       try {
         await ingameSoundRef.current.stopAsync();
@@ -263,27 +263,8 @@ export function AudioStoreProvider({
       } catch {}
       ingameSoundRef.current = null;
     }
-    // Restore lobby music at full volume
-    lobbyIsFullRef.current = true;
-    if (!lobbySoundRef.current) {
-      try {
-        const { sound } = await Audio.Sound.createAsync(
-          LOBBY_BGM[lobbyTrackRef.current],
-          { isLooping: true, volume: musicVol(true) },
-        );
-        lobbySoundRef.current = sound;
-        await sound.playAsync();
-      } catch {}
-    } else {
-      try {
-        await lobbySoundRef.current.setVolumeAsync(musicVol(true));
-        const status = await lobbySoundRef.current.getStatusAsync();
-        if (status.isLoaded && !status.isPlaying) {
-          await lobbySoundRef.current.playAsync();
-        }
-      } catch {}
-    }
-  }, [musicVol]);
+    // Let the next screen's focus handler (e.g., onLobbyFocus) manage its BGM
+  }, []);
 
   const stopIngameBgm = useCallback(async () => {
     ingameIsFullRef.current = false;
