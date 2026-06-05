@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
@@ -20,6 +20,7 @@ import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
+import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
 
@@ -47,6 +48,17 @@ export default function PlayScreen() {
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollX.value = event.contentOffset.x;
   });
+
+  // Audio: Start lobby BGM on focus, lower on blur
+  const { onLobbyFocus, onLobbyBlur } = useAudioStore();
+  useFocusEffect(
+    useCallback(() => {
+      onLobbyFocus();
+      return () => {
+        onLobbyBlur();
+      };
+    }, [onLobbyFocus, onLobbyBlur]),
+  );
 
   // The active index is a discrete value (drives the Play button), so it only
   // needs to update once momentum settles on a snapped card.
