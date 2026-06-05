@@ -83,6 +83,16 @@ Current routes:
 - `contexts/profile-store.tsx` owns profile state, settings, audio levels, game stats, and play history persistence.
 - `lib/scenario.ts` resolves game-end title/subtitle/node values shared by results and history recording.
 
+## Deck Card Visual System (Goal-14)
+
+- `components/deck-card.tsx` renders carousel cards with color-matched card holder SVG and picker icon overlay.
+- `constants/cards-icons.ts` stores 5 SVG picker icons (decks-icon-1 through decks-icon-5) as strings. `tintDeckIcon(svg, colorKey)` replaces blue shades with target color's Tokens shades (same pattern as svg-buttons).
+- `constants/card-holders.ts` maps `ColorScaleKey` → card holder SVG component. Blue falls back to indigo (no blue file exists).
+- `components/diamond-grid.tsx` renders `diamond-pattern-background.svg` tinted to deck's `color[400]` at 30% opacity. Backward compatible: defaults to white for game/results screens.
+- `DeckData.iconKey?: string` carries the picker icon ID through the store to the card renderer. All 6 built-in decks use `iconKey: "decks-icon-2"`.
+- Icon overlay logic: if `deck.iconKey` matches a picker icon ID → render tinted `SvgXml`; otherwise → fallback to `HugeiconsIcon` in white.
+- Assets: `assets/svg/cards-holder/` (10 SVGs mapped by color), `assets/svg/cards-icons/` (5 picker SVGs), `assets/svg/background/diamond-pattern-background.svg`.
+
 ## UI System
 
 - Use the existing React Native components, `constants/tokens.ts`, and `@hugeicons/react-native` icon pattern.
