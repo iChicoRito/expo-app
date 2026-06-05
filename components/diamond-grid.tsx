@@ -387,12 +387,12 @@ export const DiamondGrid = memo(function DiamondGrid({
 }: Props) {
   const svg = svgSource.replace(/fill="white"/g, `fill="${color}"`);
 
-  const translateY = useSharedValue(height);
+  const translateY = useSharedValue(0);
 
   useEffect(() => {
     if (!animated) return;
     translateY.value = withRepeat(
-      withTiming(0, { duration: scrollDuration, easing: Easing.linear }),
+      withTiming(-height, { duration: scrollDuration, easing: Easing.linear }),
       -1,
       false,
     );

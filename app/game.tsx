@@ -359,9 +359,9 @@ export default function GameScreen() {
         <DiamondGrid
           width={SCREEN_WIDTH}
           height={SCREEN_HEIGHT}
-          opacity={0.1}
+          opacity={0.05}
           animated
-          scrollDuration={25000}
+          scrollDuration={35000}
         />
       </View>
 
