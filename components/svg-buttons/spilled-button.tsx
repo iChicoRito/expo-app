@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -108,16 +108,23 @@ type Props = {
   label: string;
 };
 
-export function SpilledButton({ colorScale, onPress }: Props) {
+export const SpilledButton = memo(function SpilledButton({
+  colorScale,
+  onPress,
+  label,
+}: Props) {
   const [pressed, setPressed] = useState(false);
-  const xml = (pressed ? PRESSED_SVG : DEFAULT_SVG)
-    .replace(/#0D9488/gi, colorScale.c600);
+  const xml = useMemo(
+    () => (pressed ? PRESSED_SVG : DEFAULT_SVG).replace(/#0D9488/gi, colorScale.c600),
+    [colorScale.c600, pressed],
+  );
 
   return (
     <Pressable
       onPress={onPress}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
+      accessibilityLabel={label}
     >
       <View style={styles.container}>
         {pressed ? (
@@ -130,7 +137,7 @@ export function SpilledButton({ colorScale, onPress }: Props) {
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: { width: 82, height: 77 },

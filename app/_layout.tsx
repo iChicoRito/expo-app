@@ -1,35 +1,23 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { DeckStoreProvider } from '@/contexts/deck-store';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <DeckStoreProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-          <Stack.Screen name="play" options={{ headerShown: false }} />
-          <Stack.Screen name="preparation" options={{ headerShown: false }} />
-          <Stack.Screen name="game" options={{ headerShown: false }} />
-          <Stack.Screen name="results" options={{ headerShown: false }} />
-          <Stack.Screen name="decks" options={{ headerShown: false }} />
-          <Stack.Screen name="questions" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="play" options={{ headerShown: false }} />
+        <Stack.Screen name="preparation" options={{ headerShown: false }} />
+        <Stack.Screen name="game" options={{ headerShown: false }} />
+        <Stack.Screen name="results" options={{ headerShown: false }} />
+        <Stack.Screen name="decks" options={{ headerShown: false }} />
+        <Stack.Screen name="questions" options={{ headerShown: false }} />
+      </Stack>
+      <StatusBar style="auto" />
     </DeckStoreProvider>
   );
 }

@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
+  type ListRenderItem,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   StyleSheet,
@@ -19,7 +20,7 @@ import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
-import { useDeckStore } from "@/contexts/deck-store";
+import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -55,6 +56,43 @@ export default function PlayScreen() {
       setActiveIndex(Math.max(0, Math.min(idx, decks.length - 1)));
     },
     [decks.length],
+  );
+
+  const keyExtractor = useCallback((deck: StoreDeck) => deck.id, []);
+
+  const getItemLayout = useCallback(
+    (_: ArrayLike<StoreDeck> | null | undefined, index: number) => ({
+      length: ITEM_SIZE,
+      offset: ITEM_SIZE * index,
+      index,
+    }),
+    [],
+  );
+
+  const renderSeparator = useCallback(
+    () => <View style={{ width: CARD_GAP }} />,
+    [],
+  );
+
+  const renderDeck = useCallback<ListRenderItem<StoreDeck>>(
+    ({ item, index }) => (
+      <DeckCard
+        deck={item}
+        width={CARD_WIDTH}
+        height={CARD_HEIGHT}
+        index={index}
+        itemSize={ITEM_SIZE}
+        scrollX={scrollX}
+        isActive={index === activeIndex}
+        onPlay={() =>
+          router.push({
+            pathname: "/preparation",
+            params: { deckId: item.id, name: displayName },
+          })
+        }
+      />
+    ),
+    [activeIndex, displayName, router, scrollX],
   );
 
   return (
@@ -94,7 +132,7 @@ export default function PlayScreen() {
       <View style={styles.carouselWrapper}>
         <Animated.FlatList
           data={decks}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           horizontal
           style={styles.carousel}
           showsHorizontalScrollIndicator={false}
@@ -108,28 +146,13 @@ export default function PlayScreen() {
           scrollEventThrottle={16}
           onScroll={scrollHandler}
           onMomentumScrollEnd={handleMomentumEnd}
+          getItemLayout={getItemLayout}
           contentContainerStyle={[
             styles.carouselContent,
             { paddingHorizontal: SIDE_PAD },
           ]}
-          ItemSeparatorComponent={() => <View style={{ width: CARD_GAP }} />}
-          renderItem={({ item, index }) => (
-            <DeckCard
-              deck={item}
-              width={CARD_WIDTH}
-              height={CARD_HEIGHT}
-              index={index}
-              itemSize={ITEM_SIZE}
-              scrollX={scrollX}
-              isActive={index === activeIndex}
-              onPlay={() =>
-                router.push({
-                  pathname: "/preparation",
-                  params: { deckId: item.id, name: displayName },
-                })
-              }
-            />
-          )}
+          ItemSeparatorComponent={renderSeparator}
+          renderItem={renderDeck}
         />
 
         {/* Page dots */}

@@ -20,7 +20,7 @@ export default function Index() {
       .catch(() => {
         router.replace("/onboarding");
       });
-  }, []);
+  }, [router]);
 
   return <View style={styles.blank} />;
 }

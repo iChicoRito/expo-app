@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   interpolate,
@@ -13,7 +13,7 @@ import { Tokens } from "@/constants/tokens";
 type Props = { active: boolean };
 
 /** Pill-style page dot: expands and turns teal when active. */
-export function DotIndicator({ active }: Props) {
+export const DotIndicator = memo(function DotIndicator({ active }: Props) {
   const progress = useSharedValue(active ? 1 : 0);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export function DotIndicator({ active }: Props) {
   }));
 
   return <Animated.View style={[styles.dot, animatedStyle]} />;
-}
+});
 
 const styles = StyleSheet.create({
   dot: {

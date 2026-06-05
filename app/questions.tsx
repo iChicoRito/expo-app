@@ -7,9 +7,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
-  ScrollView,
+  FlatList,
+  type ListRenderItem,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,8 +21,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Dialog } from "@/components/dialog";
 import { QuestionListItem } from "@/components/question-list-item";
 import { QuestionSheet, type QuestionSheetMode } from "@/components/question-sheet";
-import { useDeckStore, type Question } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
+import { useDeckStore, type Question } from "@/contexts/deck-store";
 
 type AiStage = "idle" | "generating" | "result" | "offline" | "error";
 
@@ -44,42 +45,37 @@ export default function QuestionsScreen() {
   const isBuiltIn = deck?.isBuiltIn ?? true;
   const questions = getQuestionObjects(deckId);
 
-  // Sheet (add/edit/view)
   const [sheetMode, setSheetMode] = useState<QuestionSheetMode | null>(null);
   const [draft, setDraft] = useState("");
   const [active, setActive] = useState<{ q: Question; index: number } | null>(null);
-
-  // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
-
-  // AI flow
   const [aiStage, setAiStage] = useState<AiStage>("idle");
   const [aiText, setAiText] = useState("");
 
-  const closeSheet = () => {
+  const closeSheet = useCallback(() => {
     setSheetMode(null);
     setActive(null);
     setDraft("");
-  };
+  }, []);
 
-  const openAdd = () => {
+  const openAdd = useCallback(() => {
     setActive(null);
     setDraft("");
     setSheetMode("add");
-  };
+  }, []);
 
-  const openEdit = (q: Question, index: number) => {
+  const openEdit = useCallback((q: Question, index: number) => {
     setActive({ q, index });
     setDraft(q.text);
     setSheetMode("edit");
-  };
+  }, []);
 
-  const openView = (q: Question, index: number) => {
+  const openView = useCallback((q: Question, index: number) => {
     setActive({ q, index });
     setSheetMode("view");
-  };
+  }, []);
 
-  const submitSheet = async () => {
+  const submitSheet = useCallback(async () => {
     if (!deckId) return;
     if (sheetMode === "add") {
       await addQuestion(deckId, draft);
@@ -87,16 +83,21 @@ export default function QuestionsScreen() {
       await editQuestion(deckId, active.q.id, draft);
     }
     closeSheet();
-  };
+  }, [active, addQuestion, closeSheet, deckId, draft, editQuestion, sheetMode]);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (deckId && deleteTarget) {
       await deleteQuestion(deckId, deleteTarget.id);
     }
     setDeleteTarget(null);
-  };
+  }, [deckId, deleteQuestion, deleteTarget]);
 
-  const runGenerate = async () => {
+  const runGenerate = useCallback(async () => {
+    if (rateLimit.blocked) {
+      setAiStage("idle");
+      return;
+    }
+
     setAiStage("generating");
     const res = await generate(deckTitle);
     if (res.ok) {
@@ -105,17 +106,32 @@ export default function QuestionsScreen() {
     } else if (res.reason === "offline") {
       setAiStage("offline");
     } else if (res.reason === "rate-limited") {
-      // Button is disabled when blocked, but guard anyway.
       setAiStage("idle");
     } else {
       setAiStage("error");
     }
-  };
+  }, [deckTitle, generate, rateLimit.blocked]);
 
-  const acceptAi = () => {
+  const acceptAi = useCallback(() => {
     setDraft(aiText);
     setAiStage("idle");
-  };
+  }, [aiText]);
+
+  const renderQuestion = useCallback<ListRenderItem<Question>>(
+    ({ item, index }) => (
+      <QuestionListItem
+        index={index + 1}
+        text={item.text}
+        isBuiltIn={isBuiltIn}
+        onView={() => openView(item, index + 1)}
+        onEdit={() => openEdit(item, index + 1)}
+        onDelete={() => setDeleteTarget(item)}
+      />
+    ),
+    [isBuiltIn, openEdit, openView],
+  );
+
+  const keyExtractor = useCallback((q: Question) => q.id, []);
 
   const aiCaption = rateLimit.blocked
     ? "You've hit the 15-request hourly limit. Please wait until your quota resets."
@@ -123,7 +139,6 @@ export default function QuestionsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -142,33 +157,29 @@ export default function QuestionsScreen() {
         </Text>
       </View>
 
-      {/* Question list */}
-      <ScrollView
+      <FlatList
+        data={questions}
+        keyExtractor={keyExtractor}
+        renderItem={renderQuestion}
         style={styles.list}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          questions.length === 0 && styles.emptyListContent,
+        ]}
         showsVerticalScrollIndicator={false}
-      >
-        {questions.map((q, i) => (
-          <QuestionListItem
-            key={q.id}
-            index={i + 1}
-            text={q.text}
-            isBuiltIn={isBuiltIn}
-            onView={() => openView(q, i + 1)}
-            onEdit={() => openEdit(q, i + 1)}
-            onDelete={() => setDeleteTarget(q)}
-          />
-        ))}
-        {questions.length === 0 && (
+        initialNumToRender={12}
+        maxToRenderPerBatch={12}
+        windowSize={7}
+        removeClippedSubviews
+        ListEmptyComponent={
           <Text style={styles.empty}>
             {isBuiltIn
               ? "This deck has no questions."
-              : "No questions yet. Tap “Add Question” to create one."}
+              : "No questions yet. Tap Add Question to create one."}
           </Text>
-        )}
-      </ScrollView>
+        }
+      />
 
-      {/* Add Question (custom decks only) */}
       {!isBuiltIn && (
         <View style={styles.fabWrap}>
           <TouchableOpacity
@@ -186,7 +197,6 @@ export default function QuestionsScreen() {
         </View>
       )}
 
-      {/* Add / Edit / View sheet */}
       <QuestionSheet
         visible={sheetMode != null}
         mode={sheetMode ?? "view"}
@@ -201,7 +211,6 @@ export default function QuestionsScreen() {
         aiDisabled={rateLimit.blocked}
       />
 
-      {/* Delete confirmation */}
       <Dialog
         visible={deleteTarget != null}
         onClose={() => setDeleteTarget(null)}
@@ -229,7 +238,6 @@ export default function QuestionsScreen() {
         </View>
       </Dialog>
 
-      {/* AI: generating */}
       <Dialog
         visible={aiStage === "generating"}
         dismissOnBackdrop={false}
@@ -243,7 +251,6 @@ export default function QuestionsScreen() {
         }
       />
 
-      {/* AI: result */}
       <Dialog
         visible={aiStage === "result"}
         onClose={() => setAiStage("idle")}
@@ -279,7 +286,6 @@ export default function QuestionsScreen() {
         )}
       </Dialog>
 
-      {/* AI: offline */}
       <Dialog
         visible={aiStage === "offline"}
         onClose={() => setAiStage("idle")}
@@ -298,7 +304,6 @@ export default function QuestionsScreen() {
         </TouchableOpacity>
       </Dialog>
 
-      {/* AI: error */}
       <Dialog
         visible={aiStage === "error"}
         onClose={() => setAiStage("idle")}
@@ -338,6 +343,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Tokens.spacing[6],
     paddingBottom: Tokens.spacing[24],
   },
+  emptyListContent: { flexGrow: 1 },
   empty: {
     textAlign: "center",
     color: Tokens.colors.neutral[400],
@@ -358,8 +364,6 @@ const styles = StyleSheet.create({
     fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
   },
-
-  // Dialog shared
   dialogRow: {
     flexDirection: "row",
     gap: Tokens.spacing[3],
@@ -384,8 +388,6 @@ const styles = StyleSheet.create({
     fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
   },
-
-  // AI dialogs
   aiMessage: {
     fontSize: Tokens.typography.fontSize.base,
     color: Tokens.colors.neutral[400],

@@ -1,4 +1,5 @@
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
+import { memo, useEffect, useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   Easing,
@@ -9,7 +10,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useEffect } from "react";
 import Svg, { Path } from "react-native-svg";
 
 import { DiamondGrid } from "@/components/diamond-grid";
@@ -62,7 +62,7 @@ function mix(hex: string, amt: number): string {
   return `rgb(${ch(r)}, ${ch(g)}, ${ch(b)})`;
 }
 
-export function DeckCard({
+export const DeckCard = memo(function DeckCard({
   deck,
   width,
   height,
@@ -72,13 +72,19 @@ export function DeckCard({
   isActive,
   onPlay,
 }: Props) {
-  const borderColor = mix(deck.bgColor, 0.3);
-  const darkBand = mix(deck.bgColor, -0.12);
-  const waveLine = mix(deck.bgColor, 0.18);
-  const waveHeight = height * 0.42;
-  const dip = height * 0.05;
-  const wavePath = `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`;
-  const waveLinePath = `M0 0 Q${width / 2} ${dip} ${width} 0`;
+  const visual = useMemo(() => {
+    const waveHeight = height * 0.42;
+    const dip = height * 0.05;
+
+    return {
+      borderColor: mix(deck.bgColor, 0.3),
+      darkBand: mix(deck.bgColor, -0.12),
+      waveLine: mix(deck.bgColor, 0.18),
+      waveHeight,
+      wavePath: `M0 0 Q${width / 2} ${dip} ${width} 0 L${width} ${waveHeight} L0 ${waveHeight} Z`,
+      waveLinePath: `M0 0 Q${width / 2} ${dip} ${width} 0`,
+    };
+  }, [deck.bgColor, height, width]);
 
   // Button slide-up + fade animation: starts 60px below with 0 opacity, animates to 0 translateY and 1 opacity when active
   const buttonTranslateY = useSharedValue(60);
@@ -101,11 +107,14 @@ export function DeckCard({
 
   // The card is centered when scrollX === index * itemSize. We interpolate scale
   // and opacity against the same input range so both share one continuous ease.
-  const inputRange = [
-    (index - 1) * itemSize,
-    index * itemSize,
-    (index + 1) * itemSize,
-  ];
+  const inputRange = useMemo(
+    () => [
+      (index - 1) * itemSize,
+      index * itemSize,
+      (index + 1) * itemSize,
+    ],
+    [index, itemSize],
+  );
 
   const animatedWrapperStyle = useAnimatedStyle(() => {
     const scale = interpolate(
@@ -139,7 +148,7 @@ export function DeckCard({
       <View
         style={[
           styles.card,
-          { backgroundColor: deck.bgColor, borderColor },
+          { backgroundColor: deck.bgColor, borderColor: visual.borderColor },
         ]}
       >
         {/* Diamond-grid texture */}
@@ -150,14 +159,14 @@ export function DeckCard({
         {/* Curved darker band near the bottom */}
         <Svg
           width={width}
-          height={waveHeight}
+          height={visual.waveHeight}
           style={styles.wave}
           pointerEvents="none"
         >
-          <Path d={wavePath} fill={darkBand} />
+          <Path d={visual.wavePath} fill={visual.darkBand} />
           <Path
-            d={waveLinePath}
-            stroke={waveLine}
+            d={visual.waveLinePath}
+            stroke={visual.waveLine}
             strokeWidth={3}
             fill="none"
           />
@@ -190,7 +199,7 @@ export function DeckCard({
       </View>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   // Outer wrapper carries the scale animation; the inner card clips its texture,

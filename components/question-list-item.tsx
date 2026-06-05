@@ -6,7 +6,7 @@
  */
 import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import {
   Dimensions,
   Modal,
@@ -28,7 +28,7 @@ type Props = {
   onDelete: () => void;
 };
 
-export function QuestionListItem({
+export const QuestionListItem = memo(function QuestionListItem({
   index,
   text,
   isBuiltIn,
@@ -40,19 +40,19 @@ export function QuestionListItem({
   const [anchor, setAnchor] = useState({ top: 0, right: 0 });
   const dotRef = useRef<View>(null);
 
-  const openMenu = () => {
+  const openMenu = useCallback(() => {
     dotRef.current?.measureInWindow((x, y, width, height) => {
       const screenW = Dimensions.get("window").width;
       setAnchor({ top: y + height + 4, right: screenW - (x + width) });
       setMenuOpen(true);
     });
-  };
+  }, []);
 
-  const choose = (fn: () => void) => {
+  const choose = useCallback((fn: () => void) => {
     setMenuOpen(false);
     // Defer so the popover unmounts before the sheet/dialog opens.
     setTimeout(fn, 0);
-  };
+  }, []);
 
   return (
     <View style={styles.row}>
@@ -114,7 +114,7 @@ export function QuestionListItem({
       </Modal>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   row: {

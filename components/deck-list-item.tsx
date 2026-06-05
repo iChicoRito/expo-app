@@ -4,6 +4,7 @@
  */
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { memo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Tokens } from "@/constants/tokens";
@@ -15,7 +16,11 @@ type Props = {
   onPress: () => void;
 };
 
-export function DeckListItem({ deck, cardCount, onPress }: Props) {
+export const DeckListItem = memo(function DeckListItem({
+  deck,
+  cardCount,
+  onPress,
+}: Props) {
   return (
     <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
       <View style={[styles.iconBadge, { backgroundColor: deck.bgColor }]}>
@@ -32,7 +37,7 @@ export function DeckListItem({ deck, cardCount, onPress }: Props) {
       />
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   row: {

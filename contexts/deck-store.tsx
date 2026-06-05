@@ -73,6 +73,24 @@ type DeckStoreValue = {
 const DeckStoreContext = createContext<DeckStoreValue | null>(null);
 
 const BUILTIN_IDS = new Set(DECKS.map((d) => d.id));
+const BUILTIN_QUESTION_TEXTS: Record<string, string[]> = Object.fromEntries(
+  DECKS.map((deck) => [deck.id, getQuestionsForDeck(deck.id)]),
+);
+const BUILTIN_QUESTION_OBJECTS: UserQuestions = Object.fromEntries(
+  Object.entries(BUILTIN_QUESTION_TEXTS).map(([deckId, questions]) => [
+    deckId,
+    questions.map((text, i) => ({
+      id: `${deckId}-${i}`,
+      text,
+    })),
+  ]),
+);
+const BUILTIN_CARD_COUNTS: Record<string, number> = Object.fromEntries(
+  Object.entries(BUILTIN_QUESTION_TEXTS).map(([deckId, questions]) => [
+    deckId,
+    questions.length,
+  ]),
+);
 
 function genId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -97,9 +115,6 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
   const [userDecks, setUserDecks] = useState<UserDeck[]>([]);
   const [userQuestions, setUserQuestions] = useState<UserQuestions>({});
   const [aiRate, setAiRate] = useState<AiRateState | null>(null);
-  // Bumped on each rate-limit change so derived `rateLimit` recomputes its
-  // time-dependent `blocked`/`resetAt` against a fresh `Date.now()`.
-  const [, setTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,33 +146,58 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
     return [...builtIn, ...custom];
   }, [userDecks]);
 
+  const deckById = useMemo(() => {
+    return new Map(decks.map((deck) => [deck.id, deck]));
+  }, [decks]);
+
+  const customQuestionTexts = useMemo<Record<string, string[]>>(() => {
+    return Object.fromEntries(
+      Object.entries(userQuestions).map(([deckId, questions]) => [
+        deckId,
+        questions.map((q) => q.text),
+      ]),
+    );
+  }, [userQuestions]);
+
+  const customCardCounts = useMemo<Record<string, number>>(() => {
+    return Object.fromEntries(
+      Object.entries(userQuestions).map(([deckId, questions]) => [
+        deckId,
+        questions.length,
+      ]),
+    );
+  }, [userQuestions]);
+
   const getDeckById = useCallback(
-    (id: string | undefined) => decks.find((d) => d.id === id),
-    [decks],
+    (id: string | undefined) => (id ? deckById.get(id) : undefined),
+    [deckById],
   );
 
   const getQuestionObjects = useCallback(
     (deckId: string | undefined): Question[] => {
       if (!deckId) return [];
-      if (BUILTIN_IDS.has(deckId)) {
-        return getQuestionsForDeck(deckId).map((text, i) => ({
-          id: `${deckId}-${i}`,
-          text,
-        }));
-      }
+      if (BUILTIN_IDS.has(deckId)) return BUILTIN_QUESTION_OBJECTS[deckId] ?? [];
       return userQuestions[deckId] ?? [];
     },
     [userQuestions],
   );
 
   const getQuestions = useCallback(
-    (deckId: string | undefined) => getQuestionObjects(deckId).map((q) => q.text),
-    [getQuestionObjects],
+    (deckId: string | undefined) => {
+      if (!deckId) return [];
+      if (BUILTIN_IDS.has(deckId)) return BUILTIN_QUESTION_TEXTS[deckId] ?? [];
+      return customQuestionTexts[deckId] ?? [];
+    },
+    [customQuestionTexts],
   );
 
   const getCardCount = useCallback(
-    (deckId: string | undefined) => getQuestionObjects(deckId).length,
-    [getQuestionObjects],
+    (deckId: string | undefined) => {
+      if (!deckId) return 0;
+      if (BUILTIN_IDS.has(deckId)) return BUILTIN_CARD_COUNTS[deckId] ?? 0;
+      return customCardCounts[deckId] ?? 0;
+    },
+    [customCardCounts],
   );
 
   const persistDecks = useCallback(async (next: UserDeck[]) => {
@@ -228,20 +268,18 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
 
   const rateLimit = useMemo<RateLimitInfo>(
     () => getInfo(aiRate),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [aiRate],
   );
 
   const generate = useCallback<DeckStoreValue["generate"]>(
     async (deckName) => {
-      if (!(await isOnline())) return { ok: false, reason: "offline" };
       if (getInfo(aiRate).blocked) return { ok: false, reason: "rate-limited" };
+      if (!(await isOnline())) return { ok: false, reason: "offline" };
       try {
         const text = await groqGenerate(deckName);
         const nextRate = consume(aiRate);
         if (nextRate) {
           setAiRate(nextRate);
-          setTick((t) => t + 1);
           await AsyncStorage.setItem(AI_RATE_LIMIT_KEY, JSON.stringify(nextRate));
         }
         return { ok: true, text };

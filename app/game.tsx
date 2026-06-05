@@ -363,13 +363,14 @@ export default function GameScreen() {
                 </Animated.View>
               </View>
             </Pressable>
-            {/* Motion blur overlay */}
-            <Animated.View
-              style={[styles.blurOverlay, cardBlurStyle]}
-              pointerEvents="none"
-            >
-              <BlurView intensity={30} />
-            </Animated.View>
+            {isTransitioning && (
+              <Animated.View
+                style={[styles.blurOverlay, cardBlurStyle]}
+                pointerEvents="none"
+              >
+                <BlurView intensity={30} />
+              </Animated.View>
+            )}
           </Animated.View>
 
           {/* Progress bar */}

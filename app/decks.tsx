@@ -1,9 +1,10 @@
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-  ScrollView,
+  FlatList,
+  type ListRenderItem,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,8 +17,8 @@ import type { ColorScaleKey } from "@/components/deck-card";
 import { CreateDeckSheet } from "@/components/create-deck-sheet";
 import { DeckListItem } from "@/components/deck-list-item";
 import { Snackbar } from "@/components/snackbar";
-import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
+import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
 
 type Filter = "all" | "builtin" | "mine";
 
@@ -41,7 +42,7 @@ export default function DecksScreen() {
     return decks;
   }, [decks, filter]);
 
-  const handleCreate = async (input: {
+  const handleCreate = useCallback(async (input: {
     name: string;
     iconKey: string;
     colorKey: ColorScaleKey;
@@ -49,13 +50,31 @@ export default function DecksScreen() {
     await createDeck(input);
     setSheetOpen(false);
     setSnackVisible(true);
-    // Reset the one-shot visibility flag after the snackbar's lifetime.
     setTimeout(() => setSnackVisible(false), 3300);
-  };
+  }, [createDeck]);
+
+  const renderDeck = useCallback<ListRenderItem<StoreDeck>>(
+    ({ item }) => (
+      <DeckListItem
+        deck={item}
+        cardCount={getCardCount(item.id)}
+        onPress={() =>
+          router.push({ pathname: "/questions", params: { deckId: item.id } })
+        }
+      />
+    ),
+    [getCardCount, router],
+  );
+
+  const keyExtractor = useCallback((deck: StoreDeck) => deck.id, []);
+
+  const renderSeparator = useCallback(
+    () => <View style={styles.listSeparator} />,
+    [],
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>
           {"Create your "}
@@ -63,7 +82,6 @@ export default function DecksScreen() {
         </Text>
       </View>
 
-      {/* Filter chips */}
       <View style={styles.chipsRow}>
         {FILTERS.map((f) => {
           const active = f.key === filter;
@@ -82,30 +100,28 @@ export default function DecksScreen() {
         })}
       </View>
 
-      {/* Deck list */}
-      <ScrollView
+      <FlatList
+        data={visibleDecks}
+        keyExtractor={keyExtractor}
+        renderItem={renderDeck}
+        ItemSeparatorComponent={renderSeparator}
         style={styles.list}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          visibleDecks.length === 0 && styles.emptyListContent,
+        ]}
         showsVerticalScrollIndicator={false}
-      >
-        {visibleDecks.map((deck) => (
-          <DeckListItem
-            key={deck.id}
-            deck={deck}
-            cardCount={getCardCount(deck.id)}
-            onPress={() =>
-              router.push({ pathname: "/questions", params: { deckId: deck.id } })
-            }
-          />
-        ))}
-        {visibleDecks.length === 0 && (
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={5}
+        removeClippedSubviews
+        ListEmptyComponent={
           <Text style={styles.empty}>
-            No decks here yet. Tap “Create Deck” to make one.
+            No decks here yet. Tap Create Deck to make one.
           </Text>
-        )}
-      </ScrollView>
+        }
+      />
 
-      {/* Create Deck button */}
       <View style={styles.fabWrap}>
         <TouchableOpacity
           style={styles.fab}
@@ -179,8 +195,9 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: Tokens.spacing[6],
     paddingBottom: Tokens.spacing[24],
-    gap: Tokens.spacing[3],
   },
+  emptyListContent: { flexGrow: 1 },
+  listSeparator: { height: Tokens.spacing[3] },
   empty: {
     textAlign: "center",
     color: Tokens.colors.neutral[400],
