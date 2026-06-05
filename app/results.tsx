@@ -1,6 +1,6 @@
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -9,9 +9,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
+import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { resolveScenario } from "@/lib/scenario";
 import { Tokens } from "@/constants/tokens";
@@ -40,6 +42,12 @@ export default function ResultsScreen() {
     displayName,
   );
 
+  const { playSfx } = useAudioStore();
+
+  useEffect(() => {
+    playSfx("ending-screen");
+  }, [playSfx]);
+
   const goHome = () =>
     router.replace({ pathname: "/play", params: { name: displayName } });
 
@@ -51,18 +59,6 @@ export default function ResultsScreen() {
 
       {/* ── Header ── */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={goHome}
-          activeOpacity={0.7}
-        >
-          <HugeiconsIcon
-            icon={ArrowLeft01Icon}
-            size={22}
-            color={Tokens.colors.white}
-          />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
         <SpillrLogo width={70} height={33} color={Tokens.colors.white} />
       </View>
 
@@ -96,6 +92,13 @@ export default function ResultsScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <ConfettiCannon
+        count={200}
+        origin={{ x: -10, y: 0 }}
+        autoStart
+        fadeOut
+      />
     </SafeAreaView>
   );
 }
@@ -114,19 +117,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Tokens.spacing[5],
     paddingTop: Tokens.spacing[2],
   },
-  backButton: {
-    position: "absolute",
-    left: Tokens.spacing[5],
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Tokens.spacing[1],
-  },
-  backText: {
-    color: Tokens.colors.white,
-    fontSize: Tokens.typography.fontSize.base,
-    fontWeight: Tokens.typography.fontWeight.semibold,
-  },
-
   // ── Result ──
   content: {
     flex: 1,
