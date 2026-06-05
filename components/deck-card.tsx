@@ -181,6 +181,7 @@ export const DeckCard = memo(function DeckCard({
             height={height}
             color={Tokens.colors[deck.colorKey][400]}
             animated
+            scrollDuration={12000}
           />
         </View>
 
