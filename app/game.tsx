@@ -33,7 +33,6 @@ import { SpillrLogo } from "@/components/spillr-logo";
 import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
 import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
-import { getCardHolder } from "@/constants/card-holders";
 import { getDeckColorScale } from "@/constants/decks";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
@@ -70,7 +69,6 @@ export default function GameScreen() {
         c500: Tokens.colors.teal[500],
         c600: Tokens.colors.teal[600],
       };
-  const CardHolder = getCardHolder(deck?.colorKey ?? "teal");
   const questions = getQuestions(deckId);
   const total = questions.length;
 
@@ -400,10 +398,6 @@ export default function GameScreen() {
               disabled={flipped || isTransitioning}
             >
               <View style={styles.cardSizer}>
-                {/* Card holder background — clipped to card shape */}
-                <View style={styles.cardHolderLayer}>
-                  <CardHolder width={CARD_WIDTH} height={CARD_HEIGHT} />
-                </View>
                 {/* Front — unflipped */}
                 <Animated.View style={[styles.cardFace, frontStyle]}>
                   <View
@@ -637,13 +631,9 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
   },
-  cardHolderLayer: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 28,
-    overflow: "hidden",
-  },
   cardFace: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: Tokens.colors.white,
     borderRadius: 28,
     padding: Tokens.spacing[6],
     backfaceVisibility: "hidden",

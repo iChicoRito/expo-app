@@ -13,6 +13,7 @@ import Animated, {
 import Svg, { Path } from "react-native-svg";
 
 import { DiamondGrid } from "@/components/diamond-grid";
+import { getCardHolder } from "@/constants/card-holders";
 import { Tokens } from "@/constants/tokens";
 
 export type ColorScaleKey =
@@ -81,6 +82,9 @@ export const DeckCard = memo(function DeckCard({
   isActive,
   onPlay,
 }: Props) {
+  const CardHolder = getCardHolder(deck.colorKey);
+  const holderSize = width * 0.62;
+
   const visual = useMemo(() => {
     const waveHeight = height * 0.42;
     const dip = height * 0.05;
@@ -181,29 +185,36 @@ export const DeckCard = memo(function DeckCard({
           />
         </Svg>
 
+        {/* Card holder illustration — centered above wave */}
+        <View style={styles.holderCenter} pointerEvents="none">
+          <CardHolder width={holderSize} height={holderSize * 1.1} />
+        </View>
+
         {/* Content */}
         <View style={styles.content}>
           <View style={styles.topRow}>
-            <Text style={styles.title}>{deck.title.split(" ").join("\n")}</Text>
             <View style={styles.iconBadge}>
               <HugeiconsIcon icon={deck.icon} size={20} color={deck.bgColor} />
             </View>
           </View>
 
-          <Animated.View
-            style={buttonAnimatedStyle}
-            pointerEvents={isActive ? "auto" : "none"}
-          >
-            <TouchableOpacity
-              style={styles.playButton}
-              activeOpacity={0.85}
-              onPress={onPlay}
+          <View style={styles.bottomContent}>
+            <Text style={styles.title}>{deck.title}</Text>
+            <Animated.View
+              style={buttonAnimatedStyle}
+              pointerEvents={isActive ? "auto" : "none"}
             >
-              <Text style={[styles.playText, { color: deck.bgColor }]}>
-                Play
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+              <TouchableOpacity
+                style={styles.playButton}
+                activeOpacity={0.85}
+                onPress={onPlay}
+              >
+                <Text style={[styles.playText, { color: deck.bgColor }]}>
+                  Play
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
         </View>
       </View>
     </Animated.View>
@@ -227,6 +238,11 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
   },
+  holderCenter: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: {
     flex: 1,
     padding: Tokens.spacing[5],
@@ -234,12 +250,13 @@ const styles = StyleSheet.create({
   },
   topRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
+  },
+  bottomContent: {
+    gap: Tokens.spacing[3],
   },
   title: {
-    flexShrink: 1,
-    fontSize: Tokens.typography.fontSize["6xl"],
+    fontSize: Tokens.typography.fontSize["2xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
   },
