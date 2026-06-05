@@ -30,7 +30,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Dialog } from "@/components/dialog";
 import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
-import { EXTENDED_BACKGROUND_SVG } from "@/constants/extended-background-svg";
 import { EndRoundButton } from "@/components/svg-buttons/end-round-button";
 import { PassButton } from "@/components/svg-buttons/pass-button";
 import { SpilledButton } from "@/components/svg-buttons/spilled-button";
@@ -366,8 +365,7 @@ export default function GameScreen() {
               height={SCREEN_HEIGHT * DIAGONAL_SCALE}
               opacity={0.1}
               animated
-              scrollDuration={16000}
-              svgSource={EXTENDED_BACKGROUND_SVG}
+              scrollDuration={25000}
             />
           </View>
         </View>
