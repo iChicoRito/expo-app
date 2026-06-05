@@ -44,8 +44,6 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.82;
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
 const TIMER_SECONDS = 120; // fixed 2-minute round
-const DIAGONAL_SCALE = 1.9;
-const DIAGONAL_ANGLE = 45; // degrees — must be ≥25 per spec
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -358,17 +356,13 @@ export default function GameScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: accent }]}>
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <View style={styles.bgClip}>
-          <View style={styles.bgRotated}>
-            <DiamondGrid
-              width={SCREEN_WIDTH * DIAGONAL_SCALE}
-              height={SCREEN_HEIGHT * DIAGONAL_SCALE}
-              opacity={0.1}
-              animated
-              scrollDuration={25000}
-            />
-          </View>
-        </View>
+        <DiamondGrid
+          width={SCREEN_WIDTH}
+          height={SCREEN_HEIGHT}
+          opacity={0.1}
+          animated
+          scrollDuration={25000}
+        />
       </View>
 
       {/* ── Header ── */}
@@ -784,15 +778,5 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
-  },
-  bgClip: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: "hidden",
-  },
-  bgRotated: {
-    position: "absolute",
-    top: -(SCREEN_HEIGHT * ((DIAGONAL_SCALE - 1) / 2)),
-    left: -(SCREEN_WIDTH * ((DIAGONAL_SCALE - 1) / 2)),
-    transform: [{ rotate: `${DIAGONAL_ANGLE}deg` }],
   },
 });
