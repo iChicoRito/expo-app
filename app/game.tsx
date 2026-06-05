@@ -44,7 +44,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.82;
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
 const TIMER_SECONDS = 120; // fixed 2-minute round
-const DIAGONAL_SCALE = 1.5;
+const DIAGONAL_SCALE = 1.9;
 const DIAGONAL_ANGLE = 45; // degrees — must be ≥25 per spec
 
 function formatTime(seconds: number): string {
