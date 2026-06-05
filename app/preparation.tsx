@@ -1,12 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
@@ -22,12 +17,15 @@ export default function PreparationScreen() {
   const accent = deck?.bgColor ?? Tokens.colors.teal[500];
   const deckTitle = deck?.title ?? "Spillr";
 
-  // Fade the headline in on mount, matching the onboarding screen's entrance.
-  const opacity = useSharedValue(0);
+  const prefix = "You are about to play the ";
+  const fullText = prefix + deckTitle;
+  const [revealed, setRevealed] = useState(0);
+
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 300 });
-  }, [opacity]);
-  const fadeStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+    if (revealed >= fullText.length) return;
+    const timer = setTimeout(() => setRevealed((r) => r + 1), 40);
+    return () => clearTimeout(timer);
+  }, [revealed, fullText.length]);
 
   const handleStart = () => {
     router.push({ pathname: "/game", params: { deckId, name } });
@@ -36,10 +34,14 @@ export default function PreparationScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Animated.Text style={[styles.headline, fadeStyle]}>
-          {"You are about to play the "}
-          <Text style={{ color: accent }}>{deckTitle}</Text>
-        </Animated.Text>
+        <Text style={styles.headline}>
+          {prefix.substring(0, Math.min(revealed, prefix.length))}
+          {revealed > prefix.length ? (
+            <Text style={{ color: accent }}>
+              {deckTitle.substring(0, revealed - prefix.length)}
+            </Text>
+          ) : null}
+        </Text>
       </View>
 
       <View style={styles.buttonContainer}>
