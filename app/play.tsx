@@ -22,6 +22,7 @@ import { SpillrLogo } from "@/components/spillr-logo";
 import { StreakIconSvg } from "@/components/streak-icon-svg";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
+import { useProfileStore } from "@/contexts/profile-store";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -38,8 +39,9 @@ const CAROUSEL_HEIGHT = CARD_HEIGHT * 1.14;
 export default function PlayScreen() {
   const router = useRouter();
   const { decks } = useDeckStore();
+  const { name: storeName } = useProfileStore();
   const { name } = useLocalSearchParams<{ name?: string }>();
-  const displayName = name?.trim() || "Friend";
+  const displayName = name?.trim() || storeName?.trim() || "Friend";
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Live scroll offset, shared with each card so its scale/opacity/shadow can be

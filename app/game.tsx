@@ -54,7 +54,7 @@ function formatTime(seconds: number): string {
 export default function GameScreen() {
   const router = useRouter();
   const { getDeckById, getQuestions } = useDeckStore();
-  const { recordSession } = useProfileStore();
+  const { recordSession, name: storeName } = useProfileStore();
   const { deckId, name } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
@@ -215,7 +215,7 @@ export default function GameScreen() {
       // is the single funnel for all end paths (deck finished, End Round,
       // timeout-pass), so every completed round lands in Play History.
       if (deck) {
-        const displayName = name?.trim() || "Friend";
+        const displayName = name?.trim() || storeName?.trim() || "Friend";
         const { title, node } = resolveScenario(answered, passed, displayName);
         recordSession({
           deckId: deck.id,
@@ -237,7 +237,7 @@ export default function GameScreen() {
         },
       });
     },
-    [router, deckId, name, deck, recordSession],
+    [router, deckId, name, storeName, deck, recordSession],
   );
 
   // Advance to the next question, or end the game if the deck is finished.

@@ -9,6 +9,7 @@ import { SpillrLogo } from "@/components/spillr-logo";
 import { Tokens } from "@/constants/tokens";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
+import { useProfileStore } from "@/contexts/profile-store";
 import { resolveScenario } from "@/lib/scenario";
 
 function getResultLottie(answeredCount: number, passedCount: number) {
@@ -20,6 +21,7 @@ function getResultLottie(answeredCount: number, passedCount: number) {
 export default function ResultsScreen() {
   const router = useRouter();
   const { getDeckById } = useDeckStore();
+  const { name: storeName } = useProfileStore();
   const { deckId, name, answered, passed } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
@@ -29,7 +31,7 @@ export default function ResultsScreen() {
 
   const deck = getDeckById(deckId);
   const accent = deck?.bgColor ?? Tokens.colors.teal[600];
-  const displayName = name?.trim() || "Friend";
+  const displayName = name?.trim() || storeName?.trim() || "Friend";
   const answeredCount = Number(answered ?? 0);
   const passedCount = Number(passed ?? 0);
 
