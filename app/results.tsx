@@ -43,6 +43,7 @@ export default function ResultsScreen() {
   const answeredCount = Number(answered ?? 0);
   const passedCount = Number(passed ?? 0);
   const totalCount = Number(total ?? 0);
+  const isGhosted = answeredCount === 0 && passedCount === totalCount;
 
   const { title, subtitle } = resolveScenario(
     answeredCount,
@@ -100,7 +101,7 @@ export default function ResultsScreen() {
           source={getResultLottie(answeredCount, passedCount, totalCount)}
           autoPlay
           loop={answeredCount === 0 || answeredCount === totalCount}
-          style={styles.resultLottie}
+          style={isGhosted ? styles.resultLottieGhosted : styles.resultLottie}
         />
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
@@ -151,6 +152,11 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     marginBottom: -50,
+  },
+  resultLottieGhosted: {
+    width: 160,
+    height: 160,
+    marginBottom: -20,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
