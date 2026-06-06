@@ -32,7 +32,7 @@ export function NotificationManager() {
         }
       })();
     } else {
-      cancelAllNotifications();
+      void cancelAllNotifications();
     }
 
     return () => {
