@@ -361,6 +361,9 @@ export default function GameScreen() {
           height={SCREEN_HEIGHT}
           opacity={0.05}
           animated
+          patternScale={2.4}
+          movementAngleDeg={-45}
+          patternRotationDeg={45}
           scrollDuration={35000}
         />
       </View>

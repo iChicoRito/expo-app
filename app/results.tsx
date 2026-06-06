@@ -1,8 +1,6 @@
-import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
 import {
-  Dimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,14 +9,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import ConfettiCannon from "react-native-confetti-cannon";
 
-import { DiamondGrid } from "@/components/diamond-grid";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { resolveScenario } from "@/lib/scenario";
 import { Tokens } from "@/constants/tokens";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -59,10 +54,6 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: accent }]}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <DiamondGrid width={SCREEN_WIDTH} height={SCREEN_HEIGHT} opacity={0.1} />
-      </View>
-
       {/* ── Header ── */}
       <View style={styles.header}>
         <SpillrLogo width={70} height={33} color={Tokens.colors.white} />
@@ -70,18 +61,6 @@ export default function ResultsScreen() {
 
       {/* ── Result ── */}
       <View style={styles.content}>
-        {deck && (
-          <>
-            <View style={styles.iconBadge}>
-              <HugeiconsIcon icon={deck.icon} size={32} color={accent} />
-            </View>
-            <View style={styles.deckPill}>
-              <Text style={[styles.deckPillText, { color: accent }]}>
-                {deck.title}
-              </Text>
-            </View>
-          </>
-        )}
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
@@ -130,26 +109,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: Tokens.spacing[8],
     gap: Tokens.spacing[3],
-  },
-  iconBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Tokens.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: Tokens.spacing[1],
-  },
-  deckPill: {
-    backgroundColor: Tokens.colors.white,
-    borderRadius: Tokens.layout.borderRadius.full,
-    paddingVertical: Tokens.spacing[1],
-    paddingHorizontal: Tokens.spacing[3],
-    marginBottom: Tokens.spacing[2],
-  },
-  deckPillText: {
-    fontSize: Tokens.typography.fontSize.sm,
-    fontWeight: Tokens.typography.fontWeight.semibold,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
