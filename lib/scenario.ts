@@ -1,11 +1,11 @@
 /**
- * Single source of truth for the end-game outcome derived from answered tallies
- * vs. the full deck size. Shared by the results screen (title + subtitle) and
- * the Play-History recorder (subtitle + timeline node), so the two stay in sync.
+ * Single source of truth for the end-game outcome. Shared by the results screen
+ * (title + subtitle) and the Play-History recorder (subtitle + timeline node).
  *
- * - answered 0                  → "Certified Dodger"          (outlined)
- * - answered > 0 && < total     → "Almost Spilled Everything" (outlined)
- * - answered === total          → "You Spilled Everything"    (filled)
+ * - answered 0 && passed === total → "The Tea Got Ghosted"       (outlined)
+ * - answered 0                     → "Certified Dodger"          (outlined)
+ * - answered > 0 && < total        → "Almost Spilled Everything" (outlined)
+ * - answered === total             → "You Spilled Everything"    (filled)
  */
 export type SessionNode = "filled" | "outlined";
 
@@ -17,9 +17,17 @@ export type Scenario = {
 
 export function resolveScenario(
   answered: number,
+  passed: number,
   total: number,
   name: string,
 ): Scenario {
+  if (answered === 0 && passed === total) {
+    return {
+      title: `The Tea Got Ghosted, ${name}`,
+      subtitle: "Every card was left on read. Brutal behavior.",
+      node: "outlined",
+    };
+  }
   if (answered === 0) {
     return {
       title: `Certified Dodger, ${name}`,
