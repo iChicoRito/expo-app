@@ -35,21 +35,14 @@ const TEMPLATES = [
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
     shouldShowBanner: true,
     shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
   }),
 });
 
 export async function requestPermission(): Promise<boolean> {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "Default",
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-  }
   const { status } = await Notifications.requestPermissionsAsync();
   return status === "granted";
 }
@@ -60,6 +53,12 @@ export async function getScheduledCount(): Promise<number> {
 }
 
 export async function scheduleNotifications(name: string): Promise<void> {
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "Default",
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+  }
   await Notifications.cancelAllScheduledNotificationsAsync();
 
   const displayName = name.trim() || "you";
