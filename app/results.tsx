@@ -142,9 +142,9 @@ const styles = StyleSheet.create({
     gap: Tokens.spacing[3],
   },
   resultLottie: {
-    width: 200,
-    height: 200,
-    marginBottom: -50,
+    width: 140,
+    height: 140,
+    marginBottom: -35,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
