@@ -1,20 +1,15 @@
-import LottieView from "lottie-react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
 import { useCallback, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ConfettiCannon from "react-native-confetti-cannon";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SpillrLogo } from "@/components/spillr-logo";
+import { Tokens } from "@/constants/tokens";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { resolveScenario } from "@/lib/scenario";
-import { Tokens } from "@/constants/tokens";
 
 function getResultLottie(answeredCount: number, passedCount: number) {
   if (answeredCount === 0) return require("@/assets/lottie/clap-lottie.json");
@@ -33,7 +28,7 @@ export default function ResultsScreen() {
   }>();
 
   const deck = getDeckById(deckId);
-  const accent = deck?.bgColor ?? Tokens.colors.teal[500];
+  const accent = deck?.bgColor ?? Tokens.colors.teal[600];
   const displayName = name?.trim() || "Friend";
   const answeredCount = Number(answered ?? 0);
   const passedCount = Number(passed ?? 0);
@@ -62,13 +57,23 @@ export default function ResultsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: accent }]}>
       {/* ── Sunburst background ── */}
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View
+        style={[StyleSheet.absoluteFill, { opacity: 0.25 }]}
+        pointerEvents="none"
+      >
         <LottieView
           source={require("@/assets/lottie/sunburts-lottie.json")}
           autoPlay
           loop
           resizeMode="cover"
           style={StyleSheet.absoluteFill}
+          colorFilters={[
+            { keypath: "star", color: accent },
+            ...Array.from({ length: 19 }, (_, i) => ({
+              keypath: `star ${i + 2}`,
+              color: accent,
+            })),
+          ]}
         />
       </View>
 
@@ -82,7 +87,7 @@ export default function ResultsScreen() {
         <LottieView
           source={getResultLottie(answeredCount, passedCount)}
           autoPlay
-          loop={false}
+          loop={passedCount === 0}
           style={styles.resultLottie}
         />
         <Text style={styles.title}>{title}</Text>
@@ -102,12 +107,7 @@ export default function ResultsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ConfettiCannon
-        count={200}
-        origin={{ x: -10, y: 0 }}
-        autoStart
-        fadeOut
-      />
+      <ConfettiCannon count={200} origin={{ x: -10, y: 0 }} autoStart fadeOut />
     </SafeAreaView>
   );
 }
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   resultLottie: {
     width: 200,
     height: 200,
+    marginBottom: -50,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
