@@ -39,6 +39,9 @@ export default function ResultsScreen() {
 
   const deck = getDeckById(deckId);
   const accent = deck?.bgColor ?? Tokens.colors.teal[600];
+  const sunburstColor = deck
+    ? Tokens.colors[deck.colorKey][200]
+    : Tokens.colors.teal[200];
   const displayName = name?.trim() || storeName?.trim() || "Friend";
   const answeredCount = Number(answered ?? 0);
   const passedCount = Number(passed ?? 0);
@@ -81,10 +84,10 @@ export default function ResultsScreen() {
           resizeMode="cover"
           style={StyleSheet.absoluteFill}
           colorFilters={[
-            { keypath: "star", color: accent },
+            { keypath: "star", color: sunburstColor },
             ...Array.from({ length: 19 }, (_, i) => ({
               keypath: `star ${i + 2}`,
-              color: accent,
+              color: sunburstColor,
             })),
           ]}
         />
@@ -149,14 +152,14 @@ const styles = StyleSheet.create({
     gap: Tokens.spacing[3],
   },
   resultLottie: {
-    width: 300,
-    height: 300,
+    width: 400,
+    height: 400,
     marginBottom: -50,
   },
   resultLottieGhosted: {
-    width: 160,
-    height: 160,
-    marginBottom: -20,
+    width: 250,
+    height: 250,
+    marginBottom: -10,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
