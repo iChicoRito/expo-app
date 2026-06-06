@@ -26,6 +26,12 @@ npx expo export --platform android --clear
 
 `npm run reset-project` exists, but do not use it as normal workflow because this app is no longer the Expo starter app.
 
+## Commit And Push Rules
+
+- When committing and pushing, **always include every changed and untracked file** — no exceptions, no files left behind.
+- Stage all modified files and any new untracked files relevant to the work before committing.
+- Always push immediately after committing unless the user explicitly says not to.
+
 ## Commit Message Guidelines
 
 Use this format:
