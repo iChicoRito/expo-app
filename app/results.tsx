@@ -148,9 +148,9 @@ const styles = StyleSheet.create({
     gap: Tokens.spacing[3],
   },
   resultLottie: {
-    width: 140,
-    height: 140,
-    marginBottom: -10,
+    width: 300,
+    height: 300,
+    marginBottom: -50,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
@@ -158,18 +158,18 @@ const styles = StyleSheet.create({
     color: Tokens.colors.white,
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[6],
-    textShadowColor: "rgba(0,0,0,0.2)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    textShadowColor: "rgba(0,0,0,0.18)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 14,
   },
   subtitle: {
     fontSize: Tokens.typography.fontSize.base,
     color: "rgba(255,255,255,0.85)",
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[3],
-    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowColor: "rgba(0,0,0,0.12)",
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowRadius: 10,
   },
 
   // ── Button ──
