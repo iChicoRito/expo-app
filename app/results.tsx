@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     marginBottom: -10,
   },
   title: {
-    fontSize: Tokens.typography.fontSize["4xl"],
+    fontSize: Tokens.typography.fontSize["5xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
     textAlign: "center",
