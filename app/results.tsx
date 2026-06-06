@@ -90,7 +90,7 @@ export default function ResultsScreen() {
         <LottieView
           source={getResultLottie(answeredCount, totalCount)}
           autoPlay
-          loop={answeredCount === totalCount}
+          loop={answeredCount === 0 || answeredCount === totalCount}
           style={styles.resultLottie}
         />
         <Text style={styles.title}>{title}</Text>
