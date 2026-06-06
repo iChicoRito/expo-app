@@ -1,11 +1,11 @@
 /**
- * Single source of truth for the end-game outcome derived purely from the
- * answered/passed tallies. Shared by the results screen (title + subtitle) and
+ * Single source of truth for the end-game outcome derived from answered tallies
+ * vs. the full deck size. Shared by the results screen (title + subtitle) and
  * the Play-History recorder (subtitle + timeline node), so the two stay in sync.
  *
- * - answered 0            → "Certified Dodger"          (outlined: ended without answering)
- * - some answered + a pass → "Almost Spilled Everything" (outlined: tea left unspilled)
- * - answered, zero passes  → "You Spilled Everything"   (filled: complete spill)
+ * - answered 0                  → "Certified Dodger"          (outlined)
+ * - answered > 0 && < total     → "Almost Spilled Everything" (outlined)
+ * - answered === total          → "You Spilled Everything"    (filled)
  */
 export type SessionNode = "filled" | "outlined";
 
@@ -17,7 +17,7 @@ export type Scenario = {
 
 export function resolveScenario(
   answered: number,
-  passed: number,
+  total: number,
   name: string,
 ): Scenario {
   if (answered === 0) {
@@ -27,7 +27,7 @@ export function resolveScenario(
       node: "outlined",
     };
   }
-  if (passed > 0) {
+  if (answered < total) {
     return {
       title: `Almost Spilled Everything, ${name}`,
       subtitle: "You finished the deck, but some tea stayed unspilled.",

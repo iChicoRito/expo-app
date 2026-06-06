@@ -216,7 +216,7 @@ export default function GameScreen() {
       // timeout-pass), so every completed round lands in Play History.
       if (deck) {
         const displayName = name?.trim() || storeName?.trim() || "Friend";
-        const { title, node } = resolveScenario(answered, passed, displayName);
+        const { title, node } = resolveScenario(answered, total, displayName);
         recordSession({
           deckId: deck.id,
           deckTitle: deck.title,
@@ -234,6 +234,7 @@ export default function GameScreen() {
           name,
           answered: String(answered),
           passed: String(passed),
+          total: String(total),
         },
       });
     },

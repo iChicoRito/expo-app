@@ -12,9 +12,9 @@ import { useDeckStore } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { resolveScenario } from "@/lib/scenario";
 
-function getResultLottie(answeredCount: number, passedCount: number) {
+function getResultLottie(answeredCount: number, totalCount: number) {
   if (answeredCount === 0) return require("@/assets/lottie/clap-lottie.json");
-  if (passedCount > 0) return require("@/assets/lottie/trophy-lottie.json");
+  if (answeredCount < totalCount) return require("@/assets/lottie/trophy-lottie.json");
   return require("@/assets/lottie/star-lottie.json");
 }
 
@@ -22,22 +22,23 @@ export default function ResultsScreen() {
   const router = useRouter();
   const { getDeckById } = useDeckStore();
   const { name: storeName } = useProfileStore();
-  const { deckId, name, answered, passed } = useLocalSearchParams<{
+  const { deckId, name, answered, passed, total } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
     answered?: string;
     passed?: string;
+    total?: string;
   }>();
 
   const deck = getDeckById(deckId);
   const accent = deck?.bgColor ?? Tokens.colors.teal[600];
   const displayName = name?.trim() || storeName?.trim() || "Friend";
   const answeredCount = Number(answered ?? 0);
-  const passedCount = Number(passed ?? 0);
+  const totalCount = Number(total ?? 0);
 
   const { title, subtitle } = resolveScenario(
     answeredCount,
-    passedCount,
+    totalCount,
     displayName,
   );
 
@@ -87,9 +88,9 @@ export default function ResultsScreen() {
       {/* ── Result ── */}
       <View style={styles.content}>
         <LottieView
-          source={getResultLottie(answeredCount, passedCount)}
+          source={getResultLottie(answeredCount, totalCount)}
           autoPlay
-          loop={passedCount === 0}
+          loop={answeredCount === totalCount}
           style={styles.resultLottie}
         />
         <Text style={styles.title}>{title}</Text>
