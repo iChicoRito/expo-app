@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 14,
   },
   subtitle: {
-    fontSize: Tokens.typography.fontSize.base,
+    fontSize: Tokens.typography.fontSize.lg,
     color: "rgba(255,255,255,0.85)",
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[3],
