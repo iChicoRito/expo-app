@@ -1,3 +1,4 @@
+import LottieView from "lottie-react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect } from "react";
 import {
@@ -14,6 +15,12 @@ import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { resolveScenario } from "@/lib/scenario";
 import { Tokens } from "@/constants/tokens";
+
+function getResultLottie(answeredCount: number, passedCount: number) {
+  if (answeredCount === 0) return require("@/assets/lottie/clap-lottie.json");
+  if (passedCount > 0) return require("@/assets/lottie/trophy-lottie.json");
+  return require("@/assets/lottie/star-lottie.json");
+}
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -54,6 +61,17 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: accent }]}>
+      {/* ── Sunburst background ── */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <LottieView
+          source={require("@/assets/lottie/sunburts-lottie.json")}
+          autoPlay
+          loop
+          resizeMode="cover"
+          style={StyleSheet.absoluteFill}
+        />
+      </View>
+
       {/* ── Header ── */}
       <View style={styles.header}>
         <SpillrLogo width={70} height={33} color={Tokens.colors.white} />
@@ -61,6 +79,12 @@ export default function ResultsScreen() {
 
       {/* ── Result ── */}
       <View style={styles.content}>
+        <LottieView
+          source={getResultLottie(answeredCount, passedCount)}
+          autoPlay
+          loop={false}
+          style={styles.resultLottie}
+        />
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
@@ -102,6 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Tokens.spacing[5],
     paddingTop: Tokens.spacing[2],
   },
+
   // ── Result ──
   content: {
     flex: 1,
@@ -109,6 +134,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: Tokens.spacing[8],
     gap: Tokens.spacing[3],
+  },
+  resultLottie: {
+    width: 200,
+    height: 200,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
