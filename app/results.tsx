@@ -12,10 +12,16 @@ import { useDeckStore } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { resolveScenario } from "@/lib/scenario";
 
-function getResultLottie(answeredCount: number, passedCount: number, totalCount: number) {
-  if (answeredCount === 0 && passedCount === totalCount) return require("@/assets/lottie/ghosted-lottie.json");
+function getResultLottie(
+  answeredCount: number,
+  passedCount: number,
+  totalCount: number,
+) {
+  if (answeredCount === 0 && passedCount === totalCount)
+    return require("@/assets/lottie/ghosted-lottie.json");
   if (answeredCount === 0) return require("@/assets/lottie/clap-lottie.json");
-  if (answeredCount < totalCount) return require("@/assets/lottie/trophy-lottie.json");
+  if (answeredCount < totalCount)
+    return require("@/assets/lottie/trophy-lottie.json");
   return require("@/assets/lottie/star-lottie.json");
 }
 
@@ -144,7 +150,7 @@ const styles = StyleSheet.create({
   resultLottie: {
     width: 140,
     height: 140,
-    marginBottom: -35,
+    marginBottom: -10,
   },
   title: {
     fontSize: Tokens.typography.fontSize["4xl"],
@@ -152,12 +158,18 @@ const styles = StyleSheet.create({
     color: Tokens.colors.white,
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[6],
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   subtitle: {
     fontSize: Tokens.typography.fontSize.base,
     color: "rgba(255,255,255,0.85)",
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[3],
+    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 
   // ── Button ──
