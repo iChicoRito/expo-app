@@ -181,7 +181,7 @@ export const DeckCard = memo(function DeckCard({
             height={height}
             color={Tokens.colors[deck.colorKey][400]}
             opacity={0.3}
-            patternScale={2.3}
+            patternScale={2.5}
           />
         </View>
 
