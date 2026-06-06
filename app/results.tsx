@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   resultLottie: {
     width: 400,
     height: 400,
-    marginBottom: -50,
+    marginBottom: -90,
   },
   resultLottieGhosted: {
     width: 250,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     marginBottom: -10,
   },
   title: {
-    fontSize: Tokens.typography.fontSize["4xl"],
+    fontSize: Tokens.typography.fontSize["5xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
     textAlign: "center",
