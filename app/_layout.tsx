@@ -5,12 +5,14 @@ import 'react-native-reanimated';
 import { DeckStoreProvider } from '@/contexts/deck-store';
 import { ProfileStoreProvider } from '@/contexts/profile-store';
 import { AudioStoreProvider } from '@/contexts/audio-store';
+import { NotificationManager } from '@/components/notification-manager';
 
 export default function RootLayout() {
   return (
     <DeckStoreProvider>
       <ProfileStoreProvider>
         <AudioStoreProvider>
+          <NotificationManager />
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
