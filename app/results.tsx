@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.white,
     textAlign: "center",
-    lineHeight: Tokens.typography.lineHeight[6],
+    lineHeight: Tokens.typography.lineHeight[8],
     textShadowColor: "rgba(0,0,0,0.18)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 14,
