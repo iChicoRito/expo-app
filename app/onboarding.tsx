@@ -17,11 +17,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import * as SecureStore from "expo-secure-store";
-
 import { DotIndicator } from "@/components/dot-indicator";
 import { Tokens } from "@/constants/tokens";
-import { USER_NAME_KEY } from "@/constants/storage";
+import { useProfileStore } from "@/contexts/profile-store";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.52;
@@ -89,6 +87,7 @@ function FadeContent({ children }: { children: React.ReactNode }) {
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { updateProfile } = useProfileStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [name, setName] = useState("");
 
@@ -110,13 +109,13 @@ export default function OnboardingScreen() {
       setCurrentStep(currentStep + 1);
     } else {
       const trimmedName = name.trim();
-      SecureStore.setItemAsync(USER_NAME_KEY, trimmedName)
+      updateProfile({ name: trimmedName })
         .catch(() => {})
         .finally(() => {
           router.replace({ pathname: "/play", params: { name: trimmedName } });
         });
     }
-  }, [currentStep, step, name, router]);
+  }, [currentStep, step, name, router, updateProfile]);
 
   const renderContent = () => {
     if (step.type === "intro") {
