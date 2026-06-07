@@ -4,7 +4,7 @@
  */
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -28,25 +28,32 @@ import { Tokens } from "@/constants/tokens";
 type Props = {
   visible: boolean;
   onClose: () => void;
-  onCreate: (input: {
-    name: string;
-    iconKey: string;
-    colorKey: ColorScaleKey;
-  }) => void;
+  onCreate?: (input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => void;
+  onSave?: (input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => void;
+  initialValues?: { name: string; iconKey: string; colorKey: ColorScaleKey };
 };
 
-export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
-  const [name, setName] = useState("");
-  const [iconKey, setIconKey] = useState<string>(PICKER_ICON_IDS[0]);
+export function CreateDeckSheet({ visible, onClose, onCreate, onSave, initialValues }: Props) {
+  const isEditMode = !!initialValues;
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [iconKey, setIconKey] = useState<string>(initialValues?.iconKey ?? PICKER_ICON_IDS[0]);
   const [colorKey, setColorKey] = useState<ColorScaleKey>(
-    DECK_COLOR_SWATCHES[2],
+    initialValues?.colorKey ?? DECK_COLOR_SWATCHES[2],
   );
 
   const reset = () => {
-    setName("");
-    setIconKey(PICKER_ICON_IDS[0]);
-    setColorKey(DECK_COLOR_SWATCHES[2]);
+    setName(initialValues?.name ?? "");
+    setIconKey(initialValues?.iconKey ?? PICKER_ICON_IDS[0]);
+    setColorKey(initialValues?.colorKey ?? DECK_COLOR_SWATCHES[2]);
   };
+
+  useEffect(() => {
+    if (visible && initialValues) {
+      setName(initialValues.name);
+      setIconKey(initialValues.iconKey);
+      setColorKey(initialValues.colorKey);
+    }
+  }, [visible, initialValues]);
 
   const handleClose = () => {
     reset();
@@ -57,7 +64,12 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    onCreate({ name: name.trim(), iconKey, colorKey });
+    const input = { name: name.trim(), iconKey, colorKey };
+    if (isEditMode) {
+      onSave?.(input);
+    } else {
+      onCreate?.(input);
+    }
     reset();
   };
 
@@ -65,7 +77,7 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
 
   return (
     <Sheet visible={visible} onClose={handleClose}>
-      <Text style={styles.heading}>Create Deck</Text>
+      <Text style={styles.heading}>{isEditMode ? "Edit Deck" : "Create Deck"}</Text>
 
       <Text style={styles.label}>Deck Name</Text>
       <TextInput
@@ -74,7 +86,7 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
         placeholderTextColor={Tokens.colors.neutral[400]}
         value={name}
         onChangeText={setName}
-        maxLength={40}
+        maxLength={20}
       />
 
       <Text style={styles.label}>Icon</Text>
@@ -135,7 +147,7 @@ export function CreateDeckSheet({ visible, onClose, onCreate }: Props) {
         activeOpacity={0.85}
         disabled={!canSubmit}
       >
-        <Text style={styles.submitText}>Create Deck</Text>
+        <Text style={styles.submitText}>{isEditMode ? "Save Changes" : "Create Deck"}</Text>
       </TouchableOpacity>
     </Sheet>
   );
