@@ -39,6 +39,8 @@ import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { resolveScenario } from "@/lib/scenario";
+import { scheduleStreakNotifications } from "@/lib/notifications";
+import { computeNewStreak } from "@/lib/streak";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.82;
@@ -54,7 +56,7 @@ function formatTime(seconds: number): string {
 export default function GameScreen() {
   const router = useRouter();
   const { getDeckById, getQuestions } = useDeckStore();
-  const { recordSession, name: storeName } = useProfileStore();
+  const { recordSession, name: storeName, streak, notifications } = useProfileStore();
   const { deckId, name } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
@@ -211,6 +213,9 @@ export default function GameScreen() {
 
   const goToResults = useCallback(
     (answered: number, passed: number) => {
+      const now = Date.now();
+      const { newStreak, isFirstOfDay } = computeNewStreak(streak, now);
+
       // Record the real session + roll up stats before leaving the game. This
       // is the single funnel for all end paths (deck finished, End Round,
       // timeout-pass), so every completed round lands in Play History.
@@ -227,6 +232,12 @@ export default function GameScreen() {
           passed,
         });
       }
+
+      if (notifications) {
+        const displayName = name?.trim() || storeName?.trim() || "Friend";
+        scheduleStreakNotifications(displayName, now).catch(() => {});
+      }
+
       router.replace({
         pathname: "/results",
         params: {
@@ -235,10 +246,12 @@ export default function GameScreen() {
           answered: String(answered),
           passed: String(passed),
           total: String(total),
+          showStreak: isFirstOfDay ? "1" : "0",
+          streakCount: String(newStreak.count),
         },
       });
     },
-    [router, deckId, name, storeName, deck, recordSession],
+    [router, deckId, name, storeName, deck, recordSession, streak, notifications],
   );
 
   // Advance to the next question, or end the game if the deck is finished.
