@@ -251,7 +251,7 @@ export default function GameScreen() {
         },
       });
     },
-    [router, deckId, name, storeName, deck, recordSession, streak, notifications],
+    [router, deckId, name, storeName, deck, total, recordSession, streak, notifications],
   );
 
   // Advance to the next question, or end the game if the deck is finished.
