@@ -29,12 +29,14 @@ export default function ResultsScreen() {
   const router = useRouter();
   const { getDeckById } = useDeckStore();
   const { name: storeName } = useProfileStore();
-  const { deckId, name, answered, passed, total } = useLocalSearchParams<{
+  const { deckId, name, answered, passed, total, showStreak, streakCount } = useLocalSearchParams<{
     deckId?: string;
     name?: string;
     answered?: string;
     passed?: string;
     total?: string;
+    showStreak?: string;
+    streakCount?: string;
   }>();
 
   const deck = getDeckById(deckId);
@@ -67,8 +69,13 @@ export default function ResultsScreen() {
     playSfx("yehey");
   }, [playSfx]);
 
-  const goHome = () =>
-    router.replace({ pathname: "/play", params: { name: displayName } });
+  const goHome = () => {
+    if (showStreak === "1" && streakCount) {
+      router.replace({ pathname: "/streak", params: { count: streakCount } });
+    } else {
+      router.replace({ pathname: "/play", params: { name: displayName } });
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: accent }]}>
