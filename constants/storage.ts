@@ -11,3 +11,6 @@ export const AI_RATE_LIMIT_KEY = "ai_rate_limit";
 
 /** AsyncStorage key for the persisted profile blob (JSON `ProfileState`, sans name). */
 export const PROFILE_KEY = "user_profile";
+
+/** AsyncStorage key for built-in deck name/icon/color overrides (JSON `Record<string, BuiltinOverride>`). */
+export const BUILTIN_OVERRIDES_KEY = "builtin_deck_overrides";

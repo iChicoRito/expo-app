@@ -23,6 +23,7 @@ import { getDeckIcon } from "@/constants/deck-icons";
 import { getQuestionsForDeck } from "@/constants/questions";
 import {
   AI_RATE_LIMIT_KEY,
+  BUILTIN_OVERRIDES_KEY,
   USER_DECKS_KEY,
   USER_QUESTIONS_KEY,
 } from "@/constants/storage";
@@ -35,6 +36,12 @@ import {
   type AiRateState,
   type RateLimitInfo,
 } from "@/lib/rate-limit";
+
+export type BuiltinOverride = {
+  name?: string;
+  iconKey?: string;
+  colorKey?: ColorScaleKey;
+};
 
 export type UserDeck = {
   id: string;
@@ -64,6 +71,7 @@ type DeckStoreValue = {
   getCardCount: (deckId: string | undefined) => number;
   createDeck: (input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => Promise<StoreDeck>;
   deleteDeck: (deckId: string) => Promise<void>;
+  updateDeck: (deckId: string, input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => Promise<void>;
   addQuestion: (deckId: string, text: string) => Promise<void>;
   editQuestion: (deckId: string, questionId: string, text: string) => Promise<void>;
   deleteQuestion: (deckId: string, questionId: string) => Promise<void>;
@@ -117,20 +125,23 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
   const [userDecks, setUserDecks] = useState<UserDeck[]>([]);
   const [userQuestions, setUserQuestions] = useState<UserQuestions>({});
   const [aiRate, setAiRate] = useState<AiRateState | null>(null);
+  const [builtinOverrides, setBuiltinOverrides] = useState<Record<string, BuiltinOverride>>({});
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [decksRaw, questionsRaw, rateRaw] = await Promise.all([
+        const [decksRaw, questionsRaw, rateRaw, overridesRaw] = await Promise.all([
           AsyncStorage.getItem(USER_DECKS_KEY),
           AsyncStorage.getItem(USER_QUESTIONS_KEY),
           AsyncStorage.getItem(AI_RATE_LIMIT_KEY),
+          AsyncStorage.getItem(BUILTIN_OVERRIDES_KEY),
         ]);
         if (cancelled) return;
         if (decksRaw) setUserDecks(JSON.parse(decksRaw));
         if (questionsRaw) setUserQuestions(JSON.parse(questionsRaw));
         if (rateRaw) setAiRate(JSON.parse(rateRaw));
+        if (overridesRaw) setBuiltinOverrides(JSON.parse(overridesRaw));
       } catch {
         // Corrupt/missing storage → start empty.
       } finally {
@@ -143,10 +154,25 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const decks = useMemo<StoreDeck[]>(() => {
-    const builtIn: StoreDeck[] = DECKS.map((d) => ({ ...d, isBuiltIn: true }));
+    const builtIn: StoreDeck[] = DECKS.map((d) => {
+      const ov = builtinOverrides[d.id];
+      if (!ov) return { ...d, isBuiltIn: true };
+      const colorKey = ov.colorKey ?? (d.colorKey as ColorScaleKey);
+      const scale = Tokens.colors[colorKey];
+      return {
+        ...d,
+        isBuiltIn: true,
+        title: ov.name ?? d.title,
+        iconKey: ov.iconKey ?? d.iconKey,
+        icon: ov.iconKey ? getDeckIcon(ov.iconKey) : d.icon,
+        colorKey,
+        bgColor: scale[500],
+        bgLight: scale[50],
+      };
+    });
     const custom = userDecks.map(userDeckToData);
     return [...builtIn, ...custom];
-  }, [userDecks]);
+  }, [userDecks, builtinOverrides]);
 
   const deckById = useMemo(() => {
     return new Map(decks.map((deck) => [deck.id, deck]));
@@ -206,6 +232,32 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
     setUserDecks(next);
     await AsyncStorage.setItem(USER_DECKS_KEY, JSON.stringify(next));
   }, []);
+
+  const persistOverrides = useCallback(
+    async (next: Record<string, BuiltinOverride>) => {
+      setBuiltinOverrides(next);
+      await AsyncStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(next));
+    },
+    [],
+  );
+
+  const updateDeck = useCallback<DeckStoreValue["updateDeck"]>(
+    async (deckId, { name, iconKey, colorKey }) => {
+      if (BUILTIN_IDS.has(deckId)) {
+        await persistOverrides({
+          ...builtinOverrides,
+          [deckId]: { name: name.trim(), iconKey, colorKey },
+        });
+        return;
+      }
+      await persistDecks(
+        userDecks.map((d) =>
+          d.id === deckId ? { ...d, name: name.trim(), iconKey, colorKey } : d,
+        ),
+      );
+    },
+    [builtinOverrides, userDecks, persistOverrides, persistDecks],
+  );
 
   const persistQuestions = useCallback(async (next: UserQuestions) => {
     setUserQuestions(next);
@@ -315,6 +367,7 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
       getCardCount,
       createDeck,
       deleteDeck,
+      updateDeck,
       addQuestion,
       editQuestion,
       deleteQuestion,
@@ -330,6 +383,7 @@ export function DeckStoreProvider({ children }: { children: ReactNode }) {
       getCardCount,
       createDeck,
       deleteDeck,
+      updateDeck,
       addQuestion,
       editQuestion,
       deleteQuestion,
