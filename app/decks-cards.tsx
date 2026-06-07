@@ -117,7 +117,12 @@ export default function DecksCardsScreen() {
         visible={menuDeckId !== null}
         anchorY={menuY}
         onClose={() => setMenuDeckId(null)}
+        onEdit={() => {
+          // TODO: implement edit navigation
+          setMenuDeckId(null);
+        }}
         onDelete={() => setConfirmDeckId(menuDeckId)}
+        canDelete={true}
       />
 
       <Dialog

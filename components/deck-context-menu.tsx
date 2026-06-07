@@ -1,9 +1,9 @@
 /**
  * Small popover menu opened by a deck's three-dot button on the Decks and Cards
- * page (`decks-lists.png`). Per the objective the only action is Delete; it is
- * anchored near the tapped row via `anchorY` and dismisses on backdrop tap.
+ * page. Provides Edit and (conditionally) Delete actions; it is anchored near
+ * the tapped row via `anchorY` and dismisses on backdrop tap.
  */
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -12,7 +12,9 @@ import { Tokens } from "@/constants/tokens";
 type Props = {
   visible: boolean;
   onClose: () => void;
+  onEdit: () => void;
   onDelete: () => void;
+  canDelete: boolean;
   /** Vertical offset (page Y) of the tapped three-dot button. */
   anchorY?: number;
 };
@@ -20,7 +22,9 @@ type Props = {
 export function DeckContextMenu({
   visible,
   onClose,
+  onEdit,
   onDelete,
+  canDelete,
   anchorY = 120,
 }: Props) {
   if (!visible) return null;
@@ -32,16 +36,32 @@ export function DeckContextMenu({
             style={styles.item}
             onPress={() => {
               onClose();
-              onDelete();
+              onEdit();
             }}
           >
             <HugeiconsIcon
-              icon={Delete02Icon}
+              icon={PencilEdit02Icon}
               size={18}
-              color={Tokens.colors.red[500]}
+              color={Tokens.colors.neutral[700]}
             />
-            <Text style={styles.deleteText}>Delete</Text>
+            <Text style={styles.editText}>Edit</Text>
           </Pressable>
+          {canDelete && (
+            <Pressable
+              style={styles.item}
+              onPress={() => {
+                onClose();
+                onDelete();
+              }}
+            >
+              <HugeiconsIcon
+                icon={Delete02Icon}
+                size={18}
+                color={Tokens.colors.red[500]}
+              />
+              <Text style={styles.deleteText}>Delete</Text>
+            </Pressable>
+          )}
         </View>
       </Pressable>
     </Modal>
@@ -74,6 +94,11 @@ const styles = StyleSheet.create({
     gap: Tokens.spacing[3],
     paddingVertical: Tokens.spacing[3],
     paddingHorizontal: Tokens.spacing[4],
+  },
+  editText: {
+    fontSize: Tokens.typography.fontSize.base,
+    fontWeight: Tokens.typography.fontWeight.semibold,
+    color: Tokens.colors.neutral[700],
   },
   deleteText: {
     fontSize: Tokens.typography.fontSize.base,
