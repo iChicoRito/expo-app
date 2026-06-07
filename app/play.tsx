@@ -5,6 +5,7 @@ import {
   type ListRenderItem,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -15,6 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Avatar } from "@/components/avatar";
 import { BottomNav } from "@/components/bottom-nav";
 import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
@@ -39,7 +41,7 @@ const CAROUSEL_HEIGHT = CARD_HEIGHT * 1.14;
 export default function PlayScreen() {
   const router = useRouter();
   const { decks } = useDeckStore();
-  const { name: storeName } = useProfileStore();
+  const { name: storeName, avatarId, colorKey } = useProfileStore();
   const { name } = useLocalSearchParams<{ name?: string }>();
   const displayName = name?.trim() || storeName?.trim() || "Friend";
   const [activeIndex, setActiveIndex] = useState(0);
@@ -119,11 +121,12 @@ export default function PlayScreen() {
             <StreakIconSvg size={16} />
             <Text style={styles.streakText}>12 Spill Streak</Text>
           </View>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {displayName.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          <Pressable
+            onPress={() => router.push("/profile")}
+            style={[styles.avatar, { backgroundColor: Tokens.colors[colorKey][500] }]}
+          >
+            <Avatar id={avatarId} size={36} />
+          </Pressable>
         </View>
       </View>
 
@@ -228,14 +231,9 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Tokens.colors.teal[500],
     alignItems: "center",
     justifyContent: "center",
-  },
-  avatarText: {
-    color: Tokens.colors.white,
-    fontSize: Tokens.typography.fontSize.sm,
-    fontWeight: Tokens.typography.fontWeight.bold,
+    overflow: "hidden",
   },
 
   // ── Greeting ──
