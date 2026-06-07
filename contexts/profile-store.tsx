@@ -25,6 +25,7 @@ import type { ColorScaleKey } from "@/components/deck-card";
 import { DEFAULT_AVATAR_ID, type AvatarId } from "@/constants/avatars";
 import { PROFILE_KEY, USER_NAME_KEY } from "@/constants/storage";
 import type { SessionNode } from "@/lib/scenario";
+import { type StreakState, DEFAULT_STREAK, computeNewStreak } from "@/lib/streak";
 
 export type ProfileStats = {
   played: number;
@@ -57,6 +58,7 @@ type ProfileBlob = {
   audio: AudioLevels;
   stats: ProfileStats;
   history: PlaySession[];
+  streak: StreakState;
 };
 
 const DEFAULT_BLOB: ProfileBlob = {
@@ -67,6 +69,7 @@ const DEFAULT_BLOB: ProfileBlob = {
   audio: { master: 90, music: 50, sfx: 25 },
   stats: { played: 0, answered: 0, passed: 0 },
   history: [],
+  streak: DEFAULT_STREAK,
 };
 
 export type NewSession = Omit<PlaySession, "id" | "at"> & {
@@ -84,6 +87,7 @@ type ProfileStoreValue = {
   audio: AudioLevels;
   stats: ProfileStats;
   history: PlaySession[];
+  streak: StreakState;
   updateProfile: (patch: {
     name?: string;
     avatarId?: AvatarId;
@@ -172,10 +176,12 @@ export function ProfileStoreProvider({ children }: { children: ReactNode }) {
 
   const recordSession = useCallback<ProfileStoreValue["recordSession"]>(
     async ({ answered, passed, ...rest }) => {
+      const now = Date.now();
+      const { newStreak } = computeNewStreak(blob.streak, now);
       const session: PlaySession = {
         ...rest,
         id: genId(),
-        at: Date.now(),
+        at: now,
       };
       await persistProfile({
         ...blob,
@@ -185,6 +191,7 @@ export function ProfileStoreProvider({ children }: { children: ReactNode }) {
           answered: blob.stats.answered + answered,
           passed: blob.stats.passed + passed,
         },
+        streak: newStreak,
       });
     },
     [blob, persistProfile],
@@ -206,6 +213,7 @@ export function ProfileStoreProvider({ children }: { children: ReactNode }) {
       audio: blob.audio,
       stats: blob.stats,
       history: blob.history,
+      streak: blob.streak,
       updateProfile,
       setNotifications,
       setDarkMode,
