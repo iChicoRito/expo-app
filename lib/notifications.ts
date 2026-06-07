@@ -108,6 +108,12 @@ export async function scheduleStreakNotifications(
   name: string,
   lastPlayAt: number,
 ): Promise<void> {
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "Default",
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+  }
   await cancelStreakNotifications();
   const displayName = name.trim() || "you";
 
