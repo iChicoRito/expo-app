@@ -20,6 +20,7 @@ export default function RootLayout() {
             <Stack.Screen name="preparation" options={{ headerShown: false }} />
             <Stack.Screen name="game" options={{ headerShown: false }} />
             <Stack.Screen name="results" options={{ headerShown: false }} />
+            <Stack.Screen name="streak" options={{ headerShown: false }} />
             <Stack.Screen name="decks" options={{ headerShown: false }} />
             <Stack.Screen name="questions" options={{ headerShown: false }} />
             <Stack.Screen name="profile" options={{ headerShown: false }} />
