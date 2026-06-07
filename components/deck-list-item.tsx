@@ -2,7 +2,7 @@
  * A single row on the Deck page: colored icon badge + deck name + card count +
  * chevron. Tapping opens the deck's Questions page.
  */
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, Cards02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { memo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -14,17 +14,24 @@ type Props = {
   deck: StoreDeck;
   cardCount: number;
   onPress: () => void;
+  onLongPress?: () => void;
 };
 
 export const DeckListItem = memo(function DeckListItem({
   deck,
   cardCount,
   onPress,
+  onLongPress,
 }: Props) {
   return (
-    <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.row}
+      activeOpacity={0.7}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
       <View style={[styles.iconBadge, { backgroundColor: deck.bgColor }]}>
-        <HugeiconsIcon icon={deck.icon} size={22} color={Tokens.colors.white} />
+        <HugeiconsIcon icon={Cards02Icon} size={22} color={Tokens.colors.white} />
       </View>
       <View style={styles.text}>
         <Text style={styles.title}>{deck.title}</Text>
