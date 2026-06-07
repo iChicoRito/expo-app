@@ -1,7 +1,6 @@
 import {
   Cards02Icon,
   Clock01Icon,
-  Moon02Icon,
   Notification03Icon,
   PencilEdit02Icon,
   VolumeHighIcon,
@@ -35,12 +34,10 @@ export default function ProfileScreen() {
     avatarId,
     colorKey,
     notifications,
-    darkMode,
     audio,
     stats,
     updateProfile,
     setNotifications,
-    setDarkMode,
     setAudio,
   } = useProfileStore();
 
@@ -132,14 +129,6 @@ export default function ProfileScreen() {
                 value={notifications}
                 onValueChange={setNotifications}
               />
-            }
-          />
-          <View style={styles.rowDivider} />
-          <SettingsRow
-            icon={Moon02Icon}
-            label="Dark Mode"
-            right={
-              <ToggleSwitch value={darkMode} onValueChange={setDarkMode} />
             }
           />
           <View style={styles.rowDivider} />
