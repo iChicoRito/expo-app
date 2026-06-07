@@ -14,18 +14,21 @@ type Props = {
   deck: StoreDeck;
   cardCount: number;
   onPress: () => void;
+  onLongPress?: () => void;
 };
 
 export const DeckListItem = memo(function DeckListItem({
   deck,
   cardCount,
   onPress,
+  onLongPress,
 }: Props) {
   return (
     <TouchableOpacity
       style={styles.row}
       activeOpacity={0.7}
       onPress={onPress}
+      onLongPress={onLongPress}
     >
       <View style={[styles.iconBadge, { backgroundColor: deck.bgColor }]}>
         <HugeiconsIcon icon={Cards02Icon} size={22} color={Tokens.colors.white} />

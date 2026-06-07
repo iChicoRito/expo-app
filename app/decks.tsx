@@ -1,7 +1,7 @@
-import { PlusSignIcon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   type ListRenderItem,
@@ -15,7 +15,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav } from "@/components/bottom-nav";
 import type { ColorScaleKey } from "@/components/deck-card";
 import { CreateDeckSheet } from "@/components/create-deck-sheet";
+import { DeckContextMenu } from "@/components/deck-context-menu";
 import { DeckListItem } from "@/components/deck-list-item";
+import { Dialog } from "@/components/dialog";
 import { Snackbar } from "@/components/snackbar";
 import { Tokens } from "@/constants/tokens";
 import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
@@ -28,13 +30,48 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "mine", label: "My Decks" },
 ];
 
+type DeckRowProps = {
+  item: StoreDeck;
+  cardCount: number;
+  onPress: () => void;
+  onLongPress: (pageY: number) => void;
+};
+
+const DeckRow = memo(function DeckRow({
+  item,
+  cardCount,
+  onPress,
+  onLongPress,
+}: DeckRowProps) {
+  const rowRef = useRef<View>(null);
+  return (
+    <View ref={rowRef} collapsable={false}>
+      <DeckListItem
+        deck={item}
+        cardCount={cardCount}
+        onPress={onPress}
+        onLongPress={() => {
+          rowRef.current?.measure((_x, _y, _w, _h, _px, py) => {
+            onLongPress(py);
+          });
+        }}
+      />
+    </View>
+  );
+});
+
 export default function DecksScreen() {
   const router = useRouter();
-  const { decks, getCardCount, createDeck } = useDeckStore();
+  const { decks, getCardCount, createDeck, updateDeck, deleteDeck } = useDeckStore();
 
   const [filter, setFilter] = useState<Filter>("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [snackVisible, setSnackVisible] = useState(false);
+  const [menuTarget, setMenuTarget] = useState<StoreDeck | null>(null);
+  const [menuAnchorY, setMenuAnchorY] = useState(120);
+  const [editTarget, setEditTarget] = useState<StoreDeck | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<StoreDeck | null>(null);
+  const [snackMessage, setSnackMessage] = useState("Deck created successfully!");
 
   const visibleDecks = useMemo(() => {
     if (filter === "builtin") return decks.filter((d) => d.isBuiltIn);
@@ -46,20 +83,48 @@ export default function DecksScreen() {
     async (input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => {
       await createDeck(input);
       setSheetOpen(false);
+      setSnackMessage("Deck created successfully!");
       setSnackVisible(true);
       setTimeout(() => setSnackVisible(false), 3300);
     },
     [createDeck],
   );
 
+  const handleEdit = useCallback(() => {
+    setEditTarget(menuTarget);
+    setMenuTarget(null);
+  }, [menuTarget]);
+
+  const handleSave = useCallback(
+    async (input: { name: string; iconKey: string; colorKey: ColorScaleKey }) => {
+      if (!editTarget) return;
+      await updateDeck(editTarget.id, input);
+      setEditTarget(null);
+      setSnackMessage("Deck updated successfully!");
+      setSnackVisible(true);
+      setTimeout(() => setSnackVisible(false), 3300);
+    },
+    [editTarget, updateDeck],
+  );
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    await deleteDeck(deleteTarget.id);
+    setDeleteTarget(null);
+  }, [deleteTarget, deleteDeck]);
+
   const renderDeck = useCallback<ListRenderItem<StoreDeck>>(
     ({ item }) => (
-      <DeckListItem
-        deck={item}
+      <DeckRow
+        item={item}
         cardCount={getCardCount(item.id)}
         onPress={() =>
           router.push({ pathname: "/questions", params: { deckId: item.id } })
         }
+        onLongPress={(pageY) => {
+          setMenuTarget(item);
+          setMenuAnchorY(pageY);
+        }}
       />
     ),
     [getCardCount, router],
@@ -150,7 +215,61 @@ export default function DecksScreen() {
         onCreate={handleCreate}
       />
 
-      <Snackbar visible={snackVisible} message="Deck created successfully!" />
+      <Snackbar visible={snackVisible} message={snackMessage} />
+
+      <DeckContextMenu
+        visible={!!menuTarget}
+        onClose={() => setMenuTarget(null)}
+        onEdit={handleEdit}
+        onDelete={() => {
+          setDeleteTarget(menuTarget);
+          setMenuTarget(null);
+        }}
+        canDelete={!(menuTarget?.isBuiltIn ?? true)}
+        anchorY={menuAnchorY}
+      />
+
+      <CreateDeckSheet
+        visible={!!editTarget}
+        onClose={() => setEditTarget(null)}
+        initialValues={
+          editTarget
+            ? {
+                name: editTarget.title,
+                iconKey: editTarget.iconKey ?? "decks-icon-1",
+                colorKey: editTarget.colorKey,
+              }
+            : undefined
+        }
+        onSave={handleSave}
+      />
+
+      <Dialog
+        visible={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        icon={Delete02Icon}
+        iconColor={Tokens.colors.red[500]}
+        iconBg={Tokens.colors.red[100]}
+        title="Delete Deck?"
+        message={`"${deleteTarget?.title ?? ""}" and all its cards will be permanently removed. This can't be undone.`}
+      >
+        <View style={styles.dialogActions}>
+          <TouchableOpacity
+            style={[styles.dialogBtn, styles.dialogCancel]}
+            activeOpacity={0.85}
+            onPress={() => setDeleteTarget(null)}
+          >
+            <Text style={styles.dialogCancelText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.dialogBtn, styles.dialogConfirm]}
+            activeOpacity={0.85}
+            onPress={handleDeleteConfirm}
+          >
+            <Text style={styles.dialogConfirmText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </Dialog>
     </SafeAreaView>
   );
 }
@@ -222,5 +341,29 @@ const styles = StyleSheet.create({
     color: Tokens.colors.white,
     fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
+  },
+  dialogActions: {
+    flexDirection: "row",
+    gap: Tokens.spacing[3],
+    marginTop: Tokens.spacing[6],
+    width: "100%",
+  },
+  dialogBtn: {
+    flex: 1,
+    paddingVertical: Tokens.spacing[3],
+    borderRadius: Tokens.layout.borderRadius.xl,
+    alignItems: "center",
+  },
+  dialogCancel: { backgroundColor: Tokens.colors.neutral[100] },
+  dialogCancelText: {
+    fontSize: Tokens.typography.fontSize.base,
+    fontWeight: Tokens.typography.fontWeight.semibold,
+    color: Tokens.colors.neutral[700],
+  },
+  dialogConfirm: { backgroundColor: Tokens.colors.red[500] },
+  dialogConfirmText: {
+    fontSize: Tokens.typography.fontSize.base,
+    fontWeight: Tokens.typography.fontWeight.semibold,
+    color: Tokens.colors.white,
   },
 });
