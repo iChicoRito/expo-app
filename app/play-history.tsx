@@ -1,4 +1,4 @@
-import { Cards02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -7,13 +7,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Dialog } from "@/components/dialog";
 import { TimelineRow } from "@/components/timeline-row";
 import { Tokens } from "@/constants/tokens";
-import { useDeckStore } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 
 type FilterType = "all" | "spilled" | "passed" | "no-spilled";
 
 export default function PlayHistoryScreen() {
-  const { getDeckById } = useDeckStore();
   const { history, clearHistory } = useProfileStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
@@ -78,11 +76,7 @@ export default function PlayHistoryScreen() {
         {hasHistory && filteredHistory.length > 0 ? (
           <>
             {filteredHistory.map((session) => (
-              <TimelineRow
-                key={session.id}
-                session={session}
-                icon={getDeckById(session.deckId)?.icon ?? Cards02Icon}
-              />
+              <TimelineRow key={session.id} session={session} />
             ))}
           </>
         ) : (

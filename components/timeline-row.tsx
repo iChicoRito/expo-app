@@ -4,7 +4,8 @@
  * and a connector line, a colored deck-icon badge, the deck title in its color,
  * the outcome subtitle, and a right-aligned time.
  */
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
+import { HugeiconsIcon } from "@hugeicons/react-native";
+import { Cards02Icon } from "@hugeicons/core-free-icons";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Tokens } from "@/constants/tokens";
@@ -12,7 +13,6 @@ import type { PlaySession } from "@/contexts/profile-store";
 
 type Props = {
   session: PlaySession;
-  icon: IconSvgElement;
 };
 
 function formatTime(ms: number): string {
@@ -24,14 +24,14 @@ function formatTime(ms: number): string {
   return `${h}:${m}${period}`;
 }
 
-export function TimelineRow({ session, icon }: Props) {
+export function TimelineRow({ session }: Props) {
   const scale = Tokens.colors[session.colorKey];
   return (
     <>
       <View style={styles.row}>
         {/* Deck icon badge */}
         <View style={[styles.iconBadge, { backgroundColor: scale[100] }]}>
-          <HugeiconsIcon icon={icon} size={20} color={scale[500]} />
+          <HugeiconsIcon icon={Cards02Icon} size={20} color={scale[500]} />
         </View>
 
         {/* Text */}
