@@ -25,6 +25,7 @@ import { StreakIconSvg } from "@/components/streak-icon-svg";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
+import { getEffectiveStreak } from "@/lib/streak";
 import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -41,9 +42,10 @@ const CAROUSEL_HEIGHT = CARD_HEIGHT * 1.14;
 export default function PlayScreen() {
   const router = useRouter();
   const { decks } = useDeckStore();
-  const { name: storeName, avatarId, colorKey } = useProfileStore();
+  const { name: storeName, avatarId, colorKey, streak } = useProfileStore();
   const { name } = useLocalSearchParams<{ name?: string }>();
   const displayName = name?.trim() || storeName?.trim() || "Friend";
+  const liveStreak = getEffectiveStreak(streak);
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Live scroll offset, shared with each card so its scale/opacity/shadow can be
@@ -119,7 +121,7 @@ export default function PlayScreen() {
         <View style={styles.headerRight}>
           <View style={styles.streakChip}>
             <StreakIconSvg size={16} />
-            <Text style={styles.streakText}>12 Spill Streak</Text>
+            <Text style={styles.streakText}>{liveStreak} Spill Streak</Text>
           </View>
           <Pressable
             onPress={() => router.push("/profile")}
