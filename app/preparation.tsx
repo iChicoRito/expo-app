@@ -1,15 +1,16 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useDeckStore } from "@/contexts/deck-store";
 import { Tokens } from "@/constants/tokens";
+import { useDeckStore } from "@/contexts/deck-store";
 
 export default function PreparationScreen() {
   const router = useRouter();
@@ -20,6 +21,12 @@ export default function PreparationScreen() {
   }>();
   const deck = getDeckById(deckId);
   const accent = deck?.bgColor ?? Tokens.colors.teal[500];
+  const starColorDark = deck
+    ? Tokens.colors[deck.colorKey][500]
+    : Tokens.colors.teal[500];
+  const starColorLight = deck
+    ? Tokens.colors[deck.colorKey][400]
+    : Tokens.colors.teal[400];
   const deckTitle = deck?.title ?? "Spillr";
 
   const prefix = "You are about to play the ";
@@ -51,6 +58,24 @@ export default function PreparationScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
+        {textDone && (
+          <LottieView
+            source={require("@/assets/lottie/star-lottie.json")}
+            autoPlay
+            loop={false}
+            style={styles.starLottie}
+            colorFilters={[
+              { keypath: "Star.Group 1.Fill 1", color: starColorDark },
+              { keypath: "Star.Group 2.Fill 1", color: starColorLight },
+              { keypath: "Star-stroke", color: starColorDark },
+              { keypath: "BG-Circle", color: starColorLight },
+              ...Array.from({ length: 8 }, (_, i) => ({
+                keypath: `circle ${i + 1}`,
+                color: starColorLight,
+              })),
+            ]}
+          />
+        )}
         <Text style={styles.headline}>
           {prefix.substring(0, Math.min(revealed, prefix.length))}
           {revealed > prefix.length ? (
@@ -85,6 +110,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: Tokens.spacing[8],
+  },
+  starLottie: {
+    width: 300,
+    height: 300,
+    alignSelf: "center",
+    marginBottom: -40,
   },
   headline: {
     fontSize: Tokens.typography.fontSize["5xl"],

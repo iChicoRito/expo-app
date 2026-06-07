@@ -5,8 +5,9 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "lint": "expo lint"
+    "android": "expo run:android",
+    "lint": "expo lint",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.2.0",

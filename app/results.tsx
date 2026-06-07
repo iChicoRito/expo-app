@@ -22,7 +22,7 @@ function getResultLottie(
   if (answeredCount === 0) return require("@/assets/lottie/clap-lottie.json");
   if (answeredCount < totalCount)
     return require("@/assets/lottie/trophy-lottie.json");
-  return require("@/assets/lottie/star-lottie.json");
+  return require("@/assets/lottie/trophy-star.json");
 }
 
 export default function ResultsScreen() {
@@ -103,8 +103,14 @@ export default function ResultsScreen() {
         <LottieView
           source={getResultLottie(answeredCount, passedCount, totalCount)}
           autoPlay
-          loop={answeredCount === 0 || answeredCount === totalCount}
-          style={isGhosted ? styles.resultLottieGhosted : styles.resultLottie}
+          loop={answeredCount === 0}
+          style={
+            isGhosted
+              ? styles.resultLottieGhosted
+              : answeredCount === totalCount
+                ? styles.resultLottieTrophyStar
+                : styles.resultLottie
+          }
         />
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
@@ -154,7 +160,12 @@ const styles = StyleSheet.create({
   resultLottie: {
     width: 400,
     height: 400,
-    marginBottom: -90,
+    marginBottom: -80,
+  },
+  resultLottieTrophyStar: {
+    width: 400,
+    height: 400,
+    marginBottom: -60,
   },
   resultLottieGhosted: {
     width: 250,
