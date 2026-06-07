@@ -87,3 +87,51 @@ export async function scheduleNotifications(name: string): Promise<void> {
 export async function cancelAllNotifications(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
+
+const STREAK_WARNING_ID = "streak-warning";
+const STREAK_EXPIRY_ID = "streak-expiry";
+
+/**
+ * Cancels any previously scheduled streak-expiry notifications.
+ * Call this whenever the user plays (before rescheduling).
+ */
+export async function cancelStreakNotifications(): Promise<void> {
+  await Notifications.cancelScheduledNotificationAsync(STREAK_WARNING_ID).catch(() => {});
+  await Notifications.cancelScheduledNotificationAsync(STREAK_EXPIRY_ID).catch(() => {});
+}
+
+/**
+ * Schedules a warning (22 h) and expiry (24 h + 1 min) notification
+ * anchored to `lastPlayAt`. Always cancels existing streak notifications first.
+ */
+export async function scheduleStreakNotifications(
+  name: string,
+  lastPlayAt: number,
+): Promise<void> {
+  await cancelStreakNotifications();
+  const displayName = name.trim() || "you";
+
+  await Notifications.scheduleNotificationAsync({
+    identifier: STREAK_WARNING_ID,
+    content: {
+      title: "Streak Alert",
+      body: `${displayName}, your Spill Streak is expiring soon! Play a card to keep it going.`,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: new Date(lastPlayAt + 22 * 60 * 60 * 1000),
+    },
+  });
+
+  await Notifications.scheduleNotificationAsync({
+    identifier: STREAK_EXPIRY_ID,
+    content: {
+      title: "Streak Lost",
+      body: `${displayName}, your Spill Streak has reset. Start a new one today!`,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: new Date(lastPlayAt + 24 * 60 * 60 * 1000 + 60_000),
+    },
+  });
+}
