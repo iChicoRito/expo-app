@@ -1,4 +1,5 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
@@ -21,7 +22,6 @@ import { BottomNav } from "@/components/bottom-nav";
 import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
-import { StreakIconSvg } from "@/components/streak-icon-svg";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
@@ -120,7 +120,25 @@ export default function PlayScreen() {
         <SpillrLogo width={70} height={33} />
         <View style={styles.headerRight}>
           <View style={styles.streakChip}>
-            <StreakIconSvg size={16} />
+            <View style={styles.streakLottieContainer}>
+              <LottieView
+                source={require("@/assets/lottie/streak-lottie.json")}
+                autoPlay
+                loop
+                style={styles.streakLottie}
+                colorFilters={
+                  liveStreak > 0
+                    ? []
+                    : [
+                        { keypath: "Flame", color: Tokens.colors.neutral[300] },
+                        {
+                          keypath: "Flame.Group 1.Fill 1",
+                          color: Tokens.colors.neutral[300],
+                        },
+                      ]
+                }
+              />
+            </View>
             <Text style={styles.streakText}>{liveStreak} Spill Streak</Text>
           </View>
           <Pressable
@@ -223,6 +241,16 @@ const styles = StyleSheet.create({
     borderRadius: Tokens.layout.borderRadius.full,
     paddingVertical: Tokens.spacing[1],
     paddingHorizontal: Tokens.spacing[3],
+  },
+  streakLottieContainer: {
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  streakLottie: {
+    width: 24,
+    height: 24,
   },
   streakText: {
     fontSize: Tokens.typography.fontSize.sm,
