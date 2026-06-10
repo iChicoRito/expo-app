@@ -1,8 +1,10 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAudioStore } from "@/contexts/audio-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { getStreakSubtitle } from "@/lib/streak";
 import { Tokens } from "@/constants/tokens";
@@ -14,6 +16,14 @@ export default function StreakScreen() {
   const count = Number(countParam ?? 0);
   const displayName = storeName?.trim() || "Friend";
   const subtitle = getStreakSubtitle(count);
+
+  const { playSfx } = useAudioStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      playSfx("spill-result");
+    }, [playSfx]),
+  );
 
   const goHome = () =>
     router.replace({ pathname: "/play", params: { name: displayName } });
