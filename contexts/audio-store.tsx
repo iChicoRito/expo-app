@@ -19,7 +19,9 @@ export type SfxKey =
   | "card-answered"
   | "card-pass"
   | "confirmation-dialog"
-  | "yehey";
+  | "yehey"
+  | "preparation-star"
+  | "spill-result";
 
 type AudioStoreValue = {
   onLobbyFocus: () => Promise<void>;
@@ -48,6 +50,8 @@ const SFX_SOURCES: Record<SfxKey, AVPlaybackSource> = {
   "card-pass": require("@/assets/sounds/card-pass.mp3") as AVPlaybackSource,
   "confirmation-dialog": require("@/assets/sounds/confirmation-dialog.mp3") as AVPlaybackSource,
   "yehey": require("@/assets/sounds/yehey.mp3") as AVPlaybackSource,
+  "preparation-star": require("@/assets/sounds/preparation-star.mp3") as AVPlaybackSource,
+  "spill-result": require("@/assets/sounds/spill-result.mp3") as AVPlaybackSource,
 };
 
 const LOWERED_FACTOR = 0.25;
