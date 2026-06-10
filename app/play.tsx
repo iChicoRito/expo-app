@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
   streakLottie: {
     width: 18,
     height: 18,
+    marginBottom: 2,
   },
   streakText: {
     fontSize: Tokens.typography.fontSize.sm,
