@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -15,6 +15,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Mascot1 from "@/assets/svg/on-boarding/1st.svg";
@@ -28,7 +29,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const INTRO_MASCOTS = [Mascot1, Mascot2, Mascot3] as const;
 const MASCOT_OFFSETS = [-8, 8, 0];
-const MASCOT_OFFSET_Y = 20;
+const MASCOT_OFFSET_Y = 40;
 const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.5;
 const INTRO_COUNT = 3;
 
@@ -188,11 +189,29 @@ export default function OnboardingScreen() {
     return null;
   };
 
+  const swipeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .runOnJS(true)
+        .activeOffsetX([-20, 20])
+        .onEnd((e) => {
+          const isSwipeRight = e.translationX > 60 || e.velocityX > 500;
+          const isSwipeLeft = e.translationX < -60 || e.velocityX < -500;
+          if (isSwipeRight && currentStep > 0) {
+            setCurrentStep((s) => s - 1);
+          } else if (isSwipeLeft) {
+            handleButtonPress();
+          }
+        }),
+    [currentStep, handleButtonPress]
+  );
+
   const isIntro = step.type === "intro";
   const isName = step.type === "name";
   const isWelcome = step.type === "welcome";
 
   return (
+    <GestureDetector gesture={swipeGesture}>
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.flex}
@@ -248,6 +267,7 @@ export default function OnboardingScreen() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </GestureDetector>
   );
 }
 

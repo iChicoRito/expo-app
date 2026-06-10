@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { DeckStoreProvider } from '@/contexts/deck-store';
@@ -9,6 +10,7 @@ import { NotificationManager } from '@/components/notification-manager';
 
 export default function RootLayout() {
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <DeckStoreProvider>
       <ProfileStoreProvider>
         <AudioStoreProvider>
@@ -31,5 +33,6 @@ export default function RootLayout() {
         </AudioStoreProvider>
       </ProfileStoreProvider>
     </DeckStoreProvider>
+    </GestureHandlerRootView>
   );
 }
