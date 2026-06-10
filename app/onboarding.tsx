@@ -20,8 +20,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { DotIndicator } from "@/components/dot-indicator";
 import { Tokens } from "@/constants/tokens";
 import { useProfileStore } from "@/contexts/profile-store";
+import Mascot1 from "@/assets/svg/on-boarding/1st.svg";
+import Mascot2 from "@/assets/svg/on-boarding/2nd.svg";
+import Mascot3 from "@/assets/svg/on-boarding/3rd.svg";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const INTRO_MASCOTS = [Mascot1, Mascot2, Mascot3] as const;
 const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.52;
 const INTRO_COUNT = 3;
 
@@ -192,7 +197,14 @@ export default function OnboardingScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {/* Mascot area — only on intro screens */}
-        {isIntro && <View style={styles.mascotArea} />}
+        {isIntro && (
+          <View style={styles.mascotArea}>
+            {(() => {
+              const MascotSvg = INTRO_MASCOTS[currentStep];
+              return <MascotSvg width={SCREEN_WIDTH} height={MASCOT_HEIGHT} />;
+            })()}
+          </View>
+        )}
 
         {/* Content area */}
         <View
@@ -239,7 +251,8 @@ const styles = StyleSheet.create({
   // ── Mascot ──
   mascotArea: {
     height: MASCOT_HEIGHT,
-    backgroundColor: Tokens.colors.white,
+    alignItems: "center",
+    overflow: "hidden",
   },
 
   // ── Content areas ──
