@@ -243,14 +243,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Tokens.spacing[3],
   },
   streakLottieContainer: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     justifyContent: "center",
     alignItems: "center",
   },
   streakLottie: {
-    width: 24,
-    height: 24,
+    width: 18,
+    height: 18,
   },
   streakText: {
     fontSize: Tokens.typography.fontSize.sm,
