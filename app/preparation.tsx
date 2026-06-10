@@ -10,6 +10,7 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Tokens } from "@/constants/tokens";
+import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore } from "@/contexts/deck-store";
 
 export default function PreparationScreen() {
@@ -44,6 +45,14 @@ export default function PreparationScreen() {
   const buttonAnimStyle = useAnimatedStyle(() => ({
     opacity: buttonOpacity.value,
   }));
+
+  const { playSfx } = useAudioStore();
+
+  useEffect(() => {
+    if (textDone) {
+      playSfx("preparation-star");
+    }
+  }, [textDone, playSfx]);
 
   useEffect(() => {
     if (revealed >= fullText.length) return;
