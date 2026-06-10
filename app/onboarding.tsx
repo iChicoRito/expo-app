@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   introContentArea: {
     paddingTop: Tokens.spacing[6],
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
   },
   nameContentArea: {
     flex: 1,
