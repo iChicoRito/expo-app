@@ -119,7 +119,10 @@ export default function PlayScreen() {
       <View style={styles.header}>
         <SpillrLogo width={70} height={33} />
         <View style={styles.headerRight}>
-          <View style={styles.streakChip}>
+          <Pressable
+            onPress={() => router.push({ pathname: "/streak", params: { count: String(liveStreak) } })}
+            style={styles.streakChip}
+          >
             <View style={styles.streakLottieContainer}>
               <LottieView
                 source={require("@/assets/lottie/streak-lottie.json")}
@@ -140,7 +143,7 @@ export default function PlayScreen() {
               />
             </View>
             <Text style={styles.streakText}>{liveStreak} Spill Streak</Text>
-          </View>
+          </Pressable>
           <Pressable
             onPress={() => router.push("/profile")}
             style={[
