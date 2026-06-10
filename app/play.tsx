@@ -3,13 +3,13 @@ import LottieView from "lottie-react-native";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
-  type ListRenderItem,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
   Pressable,
   StyleSheet,
   Text,
   View,
+  type ListRenderItem,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -22,11 +22,11 @@ import { BottomNav } from "@/components/bottom-nav";
 import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
+import { Tokens } from "@/constants/tokens";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useDeckStore, type StoreDeck } from "@/contexts/deck-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { getEffectiveStreak } from "@/lib/streak";
-import { Tokens } from "@/constants/tokens";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.72;
@@ -143,7 +143,10 @@ export default function PlayScreen() {
           </View>
           <Pressable
             onPress={() => router.push("/profile")}
-            style={[styles.avatar, { backgroundColor: Tokens.colors[colorKey][500] }]}
+            style={[
+              styles.avatar,
+              { backgroundColor: Tokens.colors[colorKey][500] },
+            ]}
           >
             <Avatar id={avatarId} size={36} />
           </Pressable>
@@ -235,6 +238,7 @@ const styles = StyleSheet.create({
   streakChip: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: Tokens.spacing[1],
     borderWidth: Tokens.effects.borderWidth.default,
     borderColor: Tokens.colors.zinc[200],
@@ -254,7 +258,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   streakText: {
-    fontSize: Tokens.typography.fontSize.sm,
+    fontSize: Tokens.typography.fontSize.base,
     fontWeight: Tokens.typography.fontWeight.semibold,
     color: Tokens.colors.neutral[700],
   },
