@@ -27,7 +27,7 @@ import Mascot3 from "@/assets/svg/on-boarding/3rd.svg";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const INTRO_MASCOTS = [Mascot1, Mascot2, Mascot3] as const;
-const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.52;
+const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.50;
 const INTRO_COUNT = 3;
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   introContentArea: {
     paddingTop: Tokens.spacing[6],
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   nameContentArea: {
     flex: 1,
