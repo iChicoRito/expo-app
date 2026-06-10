@@ -1,13 +1,13 @@
-import { useCallback } from "react";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
+import { useCallback } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Tokens } from "@/constants/tokens";
 import { useAudioStore } from "@/contexts/audio-store";
 import { useProfileStore } from "@/contexts/profile-store";
 import { getStreakSubtitle } from "@/lib/streak";
-import { Tokens } from "@/constants/tokens";
 
 export default function StreakScreen() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function StreakScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      playSfx("spill-result");
+      playSfx("streak");
     }, [playSfx]),
   );
 
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   subtitle: {
-    fontSize: Tokens.typography.fontSize.base,
+    fontSize: Tokens.typography.fontSize.lg,
     color: Tokens.colors.neutral[400],
     textAlign: "center",
     lineHeight: Tokens.typography.lineHeight[3],

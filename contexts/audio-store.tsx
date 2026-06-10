@@ -21,7 +21,8 @@ export type SfxKey =
   | "confirmation-dialog"
   | "yehey"
   | "preparation-star"
-  | "spill-result";
+  | "spill-result"
+  | "streak";
 
 type AudioStoreValue = {
   onLobbyFocus: () => Promise<void>;
@@ -52,6 +53,7 @@ const SFX_SOURCES: Record<SfxKey, AVPlaybackSource> = {
   "yehey": require("@/assets/sounds/yehey.mp3") as AVPlaybackSource,
   "preparation-star": require("@/assets/sounds/preparation-star.mp3") as AVPlaybackSource,
   "spill-result": require("@/assets/sounds/spill-result.mp3") as AVPlaybackSource,
+  "streak": require("@/assets/sounds/streak.mp3") as AVPlaybackSource,
 };
 
 const LOWERED_FACTOR = 0.25;
