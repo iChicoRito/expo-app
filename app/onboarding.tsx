@@ -17,17 +17,18 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { DotIndicator } from "@/components/dot-indicator";
-import { Tokens } from "@/constants/tokens";
-import { useProfileStore } from "@/contexts/profile-store";
 import Mascot1 from "@/assets/svg/on-boarding/1st.svg";
 import Mascot2 from "@/assets/svg/on-boarding/2nd.svg";
 import Mascot3 from "@/assets/svg/on-boarding/3rd.svg";
+import { DotIndicator } from "@/components/dot-indicator";
+import { Tokens } from "@/constants/tokens";
+import { useProfileStore } from "@/contexts/profile-store";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const INTRO_MASCOTS = [Mascot1, Mascot2, Mascot3] as const;
-const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.50;
+const MASCOT_OFFSETS = [-8, 0, 0];
+const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.5;
 const INTRO_COUNT = 3;
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -201,7 +202,14 @@ export default function OnboardingScreen() {
           <View style={styles.mascotArea}>
             {(() => {
               const MascotSvg = INTRO_MASCOTS[currentStep];
-              return <MascotSvg width={SCREEN_WIDTH} height={MASCOT_HEIGHT} />;
+              const offsetX = MASCOT_OFFSETS[currentStep];
+              return (
+                <MascotSvg
+                  width={SCREEN_WIDTH}
+                  height={MASCOT_HEIGHT}
+                  style={{ transform: [{ translateX: offsetX }] }}
+                />
+              );
             })()}
           </View>
         )}
