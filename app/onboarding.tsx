@@ -27,7 +27,8 @@ import { useProfileStore } from "@/contexts/profile-store";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const INTRO_MASCOTS = [Mascot1, Mascot2, Mascot3] as const;
-const MASCOT_OFFSETS = [-8, 10, 0];
+const MASCOT_OFFSETS = [-8, 8, 0];
+const MASCOT_OFFSET_Y = 20;
 const MASCOT_HEIGHT = SCREEN_HEIGHT * 0.5;
 const INTRO_COUNT = 3;
 
@@ -207,7 +208,12 @@ export default function OnboardingScreen() {
                 <MascotSvg
                   width={SCREEN_WIDTH}
                   height={MASCOT_HEIGHT}
-                  style={{ transform: [{ translateX: offsetX }] }}
+                  style={{
+                    transform: [
+                      { translateX: offsetX },
+                      { translateY: MASCOT_OFFSET_Y },
+                    ],
+                  }}
                 />
               );
             })()}
