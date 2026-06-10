@@ -1,6 +1,6 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -58,6 +58,15 @@ export default function ResultsScreen() {
   );
 
   const { playSfx, stopIngameBgm } = useAudioStore();
+
+  const spillSoundPlayedRef = useRef(false);
+
+  useEffect(() => {
+    if (!spillSoundPlayedRef.current) {
+      spillSoundPlayedRef.current = true;
+      playSfx("spill-result");
+    }
+  }, [playSfx]);
 
   useFocusEffect(
     useCallback(() => {
