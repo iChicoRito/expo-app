@@ -5,7 +5,7 @@
  * server/proxy and rotated before any production release. Isolated here so
  * that move is a one-file change.
  */
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY ?? "";
 const GROQ_MODEL = "llama-3.1-8b-instant";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
