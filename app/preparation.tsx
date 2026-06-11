@@ -61,7 +61,7 @@ export default function PreparationScreen() {
   }, [revealed, fullText.length]);
 
   const handleStart = () => {
-    router.push({ pathname: "/game", params: { deckId, name } });
+    router.replace({ pathname: "/game", params: { deckId, name } });
   };
 
   return (

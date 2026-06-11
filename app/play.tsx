@@ -2,6 +2,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useCallback, useState } from "react";
 import {
+  BackHandler,
   Dimensions,
   Pressable,
   StyleSheet,
@@ -64,6 +65,17 @@ export default function PlayScreen() {
         onLobbyBlur();
       };
     }, [onLobbyFocus, onLobbyBlur]),
+  );
+
+  // Play is the root screen — back button should exit the app
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+        BackHandler.exitApp();
+        return true;
+      });
+      return () => sub.remove();
+    }, []),
   );
 
   // The active index is a discrete value (drives the Play button), so it only
