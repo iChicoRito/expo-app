@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginBottom: Tokens.spacing[2],
   },
   count: {
-    fontSize: Tokens.typography.fontSize["7xl"],
+    fontSize: Tokens.typography.fontSize["8xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.teal[500],
     lineHeight: Tokens.typography.lineHeight[11],

@@ -21,8 +21,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/components/avatar";
 import { BottomNav } from "@/components/bottom-nav";
-import { Dialog } from "@/components/dialog";
 import { DeckCard } from "@/components/deck-card";
+import { Dialog } from "@/components/dialog";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
 import { Tokens } from "@/constants/tokens";
@@ -135,7 +135,12 @@ export default function PlayScreen() {
         <SpillrLogo width={70} height={33} />
         <View style={styles.headerRight}>
           <Pressable
-            onPress={() => router.push({ pathname: "/streak", params: { count: String(liveStreak) } })}
+            onPress={() =>
+              router.push({
+                pathname: "/streak",
+                params: { count: String(liveStreak) },
+              })
+            }
             style={styles.streakChip}
           >
             <View style={styles.streakLottieContainer}>
@@ -235,20 +240,33 @@ export default function PlayScreen() {
         onClose={() => setShowExitDialog(false)}
         dismissOnBackdrop
         icon={DoorOpenIcon}
-        iconColor={Tokens.colors.teal[500]}
-        iconBg={Tokens.colors.teal[100]}
+        iconColor={Tokens.colors.red[500]}
+        iconBg={Tokens.colors.red[100]}
         title="Exit app?"
         message="Are you sure you want to exit Spillr?"
       >
-        <View style={{ flexDirection: "row", gap: 12, marginTop: 16, width: "100%" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            marginTop: 16,
+            width: "100%",
+          }}
+        >
           <Pressable
-            style={[styles.dialogBtn, { flex: 1, backgroundColor: Tokens.colors.neutral[100] }]}
+            style={[
+              styles.dialogBtn,
+              { flex: 1, backgroundColor: Tokens.colors.neutral[100] },
+            ]}
             onPress={() => setShowExitDialog(false)}
           >
             <Text style={styles.dialogBtnTextSecondary}>Stay</Text>
           </Pressable>
           <Pressable
-            style={[styles.dialogBtn, { flex: 1, backgroundColor: Tokens.colors.teal[500] }]}
+            style={[
+              styles.dialogBtn,
+              { flex: 1, backgroundColor: Tokens.colors.red[500] },
+            ]}
             onPress={() => {
               setShowExitDialog(false);
               BackHandler.exitApp();

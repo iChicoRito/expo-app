@@ -4,8 +4,8 @@
  * slot for action buttons. Drives the Delete confirm, AI "Generating",
  * AI "Question Ready", and "No Internet" dialogs.
  */
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react-native";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
     marginBottom: Tokens.spacing[4],
   },
   title: {
-    fontSize: Tokens.typography.fontSize["2xl"],
-    fontWeight: Tokens.typography.fontWeight.bold,
+    fontSize: Tokens.typography.fontSize["xl"],
+    fontWeight: Tokens.typography.fontWeight.semibold,
     color: Tokens.colors.neutral[900],
     textAlign: "center",
     marginBottom: Tokens.spacing[2],
