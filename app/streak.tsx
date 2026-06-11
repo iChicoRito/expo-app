@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     fontSize: Tokens.typography.fontSize["7xl"],
     fontWeight: Tokens.typography.fontWeight.bold,
     color: Tokens.colors.teal[500],
-    lineHeight: Tokens.typography.lineHeight[9],
+    lineHeight: Tokens.typography.lineHeight[11],
   },
   title: {
     fontSize: Tokens.typography.fontSize["3xl"],
