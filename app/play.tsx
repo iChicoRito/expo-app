@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "@/components/avatar";
 import { BottomNav } from "@/components/bottom-nav";
+import { Dialog } from "@/components/dialog";
 import { DeckCard } from "@/components/deck-card";
 import { DotIndicator } from "@/components/dot-indicator";
 import { SpillrLogo } from "@/components/spillr-logo";
@@ -48,6 +49,7 @@ export default function PlayScreen() {
   const displayName = name?.trim() || storeName?.trim() || "Friend";
   const liveStreak = getEffectiveStreak(streak);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   // Live scroll offset, shared with each card so its scale/opacity/shadow can be
   // interpolated on the UI thread for jank-free, finger-tracking motion.
@@ -67,11 +69,11 @@ export default function PlayScreen() {
     }, [onLobbyFocus, onLobbyBlur]),
   );
 
-  // Play is the root screen — back button should exit the app
+  // Play is the root screen — show exit confirmation on hardware back press
   useFocusEffect(
     useCallback(() => {
       const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-        BackHandler.exitApp();
+        setShowExitDialog(true);
         return true;
       });
       return () => sub.remove();
@@ -226,6 +228,32 @@ export default function PlayScreen() {
           if (tab === "profile") router.push("/profile");
         }}
       />
+
+      <Dialog
+        visible={showExitDialog}
+        onClose={() => setShowExitDialog(false)}
+        dismissOnBackdrop
+        title="Exit app?"
+        message="Are you sure you want to exit Spillr?"
+      >
+        <View style={{ flexDirection: "row", gap: 12, marginTop: 16, width: "100%" }}>
+          <Pressable
+            style={[styles.dialogBtn, { flex: 1, backgroundColor: Tokens.colors.neutral[100] }]}
+            onPress={() => setShowExitDialog(false)}
+          >
+            <Text style={styles.dialogBtnTextSecondary}>Stay</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.dialogBtn, { flex: 1, backgroundColor: Tokens.colors.teal[500] }]}
+            onPress={() => {
+              setShowExitDialog(false);
+              BackHandler.exitApp();
+            }}
+          >
+            <Text style={styles.dialogBtnTextPrimary}>Exit</Text>
+          </Pressable>
+        </View>
+      </Dialog>
     </SafeAreaView>
   );
 }
@@ -339,5 +367,26 @@ const styles = StyleSheet.create({
     gap: Tokens.spacing[2],
     marginTop: Tokens.spacing[6],
     marginBottom: Tokens.spacing[8],
+  },
+
+  // ── Exit dialog ──
+  dialogBtn: {
+    paddingVertical: Tokens.spacing[3],
+    paddingHorizontal: Tokens.spacing[4],
+    borderRadius: Tokens.layout.borderRadius.xl,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  dialogBtnTextSecondary: {
+    fontSize: Tokens.typography.fontSize.base,
+    fontWeight: Tokens.typography.fontWeight.semibold,
+    color: Tokens.colors.neutral[700],
+    textAlign: "center",
+  },
+  dialogBtnTextPrimary: {
+    fontSize: Tokens.typography.fontSize.base,
+    fontWeight: Tokens.typography.fontWeight.semibold,
+    color: Tokens.colors.white,
+    textAlign: "center",
   },
 });
