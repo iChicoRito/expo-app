@@ -1,3 +1,4 @@
+import { DoorOpenIcon } from "@hugeicons/core-free-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useCallback, useState } from "react";
@@ -233,6 +234,9 @@ export default function PlayScreen() {
         visible={showExitDialog}
         onClose={() => setShowExitDialog(false)}
         dismissOnBackdrop
+        icon={DoorOpenIcon}
+        iconColor={Tokens.colors.teal[500]}
+        iconBg={Tokens.colors.teal[100]}
         title="Exit app?"
         message="Are you sure you want to exit Spillr?"
       >
