@@ -15,10 +15,9 @@ function atSize(svg, size) {
 function stripBackground(svg) {
   // Remove the white background rect that sits inside <g clip-path="...">
   // The identical rect inside <defs><clipPath> must stay (it defines the clip shape).
-  return svg.replace(
-    `<g clip-path="url(#clip0_754_2146)">\n<rect width="500" height="500" rx="100" fill="white"/>`,
-    `<g clip-path="url(#clip0_754_2146)">`
-  );
+  const needle = `<g clip-path="url(#clip0_754_2146)">\n<rect width="500" height="500" rx="100" fill="white"/>`;
+  if (!svg.includes(needle)) throw new Error('stripBackground: background rect not found — SVG may have changed');
+  return svg.replace(needle, `<g clip-path="url(#clip0_754_2146)">`);
 }
 
 async function writePng(svgString, filename) {

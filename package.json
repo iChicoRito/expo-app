@@ -7,7 +7,8 @@
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "lint": "expo lint",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.2.0",
