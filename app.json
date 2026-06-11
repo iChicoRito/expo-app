@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Spillr",
-    "slug": "my-app",
+    "slug": "spillr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "spillr",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
@@ -17,7 +17,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.ichicorito.myapp"
+      "package": "com.ichicorito.spillr"
     },
     "plugins": [
       "expo-router",
