@@ -2,9 +2,10 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const SVG_PATH = path.join(__dirname, '..', 'assets', 'svg', 'icon.svg');
-const OUT_DIR  = path.join(__dirname, '..', 'assets', 'images');
-const SIZE     = 1024;
+const SVG_PATH        = path.join(__dirname, '..', 'assets', 'svg', 'icon.svg');
+const SPLASH_SVG_PATH = path.join(__dirname, '..', 'assets', 'svg', 'Spillr.svg');
+const OUT_DIR         = path.join(__dirname, '..', 'assets', 'images');
+const SIZE            = 1024;
 
 function atSize(svg, size) {
   return svg
@@ -26,15 +27,24 @@ async function writePng(svgString, filename) {
   console.log(`  ✓ ${filename}`);
 }
 
+async function writeSplashPng(svgBuffer, filename) {
+  // Spillr wordmark is 47×22 — resize to 1024px wide, auto height (maintains aspect ratio)
+  await sharp(svgBuffer).resize(1024, null).png().toFile(path.join(OUT_DIR, filename));
+  console.log(`  ✓ ${filename}`);
+}
+
 async function main() {
   const src = fs.readFileSync(SVG_PATH, 'utf8');
 
   console.log('Generating icon PNGs from assets/svg/icon.svg …');
 
-  // 1. Full icon — used as app icon and splash
+  // 1. Full icon — used as app icon
   const full = atSize(src, SIZE);
   await writePng(full, 'icon.png');
-  await writePng(full, 'splash-icon.png');
+
+  // 2. Splash — Spillr wordmark rasterized at 1024px wide
+  const splashSrc = fs.readFileSync(SPLASH_SVG_PATH);
+  await writeSplashPng(splashSrc, 'splash-icon.png');
 
   // 2. Foreground (transparent background) — adaptive icon foreground
   const fg = atSize(stripBackground(src), SIZE);
