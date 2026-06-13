@@ -37,7 +37,7 @@
             "enableMinifyInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true,
             "enablePngCrunchInReleaseBuilds": true,
-            "reactNativeArchitectures": "arm64-v8a,armeabi-v7a"
+            "buildArchs": ["arm64-v8a", "armeabi-v7a"]
           }
         }
       ]
